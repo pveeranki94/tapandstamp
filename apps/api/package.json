@@ -1,0 +1,25 @@
+{
+  "name": "@tapandstamp/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --project tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "lint": "eslint 'src/**/*.ts'",
+    "test": "jest",
+    "coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/supertest": "^2.0.16",
+    "supertest": "^6.3.4"
+  }
+}

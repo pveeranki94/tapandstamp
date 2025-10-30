@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "moduleResolution": "NodeNext",
+    "types": ["node", "jest"],
+    "noEmit": true
+  },
+  "include": ["next-env.d.ts", "app/**/*.ts", "app/**/*.tsx", "app/**/*.test.tsx"],
+  "exclude": ["node_modules", ".next"]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@tapandstamp/admin",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "lint": "eslint 'app/**/*.{ts,tsx}'",
+    "test": "jest",
+    "coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "next": "^14.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
