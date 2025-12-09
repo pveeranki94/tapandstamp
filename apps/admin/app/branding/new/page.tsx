@@ -92,7 +92,6 @@ export default function NewBrandingPage() {
     setSaving(true);
 
     try {
-      // TODO: Implement API call to save merchant and branding
       const response = await fetch('/api/merchants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -105,17 +104,16 @@ export default function NewBrandingPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save merchant');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save merchant');
       }
 
       const result = await response.json();
-      console.log('Merchant created:', result);
 
-      // TODO: Redirect to merchant dashboard or success page
-      alert('Merchant created successfully!');
+      // Redirect to success page
+      window.location.href = `/branding/success?merchantId=${result.merchantId}&slug=${result.slug}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save');
-    } finally {
       setSaving(false);
     }
   };

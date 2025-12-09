@@ -6,9 +6,10 @@ import styles from './LogoUpload.module.css';
 interface LogoUploadProps {
   currentUrl: string;
   onUpload: (url: string) => void;
+  merchantSlug?: string;
 }
 
-export function LogoUpload({ currentUrl, onUpload }: LogoUploadProps) {
+export function LogoUpload({ currentUrl, onUpload, merchantSlug }: LogoUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(currentUrl);
   const [error, setError] = useState<string | null>(null);
@@ -39,24 +40,30 @@ export function LogoUpload({ currentUrl, onUpload }: LogoUploadProps) {
       const previewUrl = URL.createObjectURL(file);
       setPreview(previewUrl);
 
-      // TODO: Implement actual upload to storage
-      // For now, just use the preview URL (in production, upload to Supabase Storage or CDN)
+      // If merchantSlug is provided, upload to storage
+      if (merchantSlug) {
+        const formData = new FormData();
+        formData.append('logo', file);
+        formData.append('slug', merchantSlug);
 
-      // Simulating upload delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+        const response = await fetch('/api/upload/logo', {
+          method: 'POST',
+          body: formData
+        });
 
-      // In production:
-      // const formData = new FormData();
-      // formData.append('logo', file);
-      // const response = await fetch('/api/upload/logo', {
-      //   method: 'POST',
-      //   body: formData
-      // });
-      // const { url } = await response.json();
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Upload failed');
+        }
 
-      onUpload(previewUrl);
+        const { url } = await response.json();
+        onUpload(url);
+      } else {
+        // Without merchantSlug, just use preview URL (for wizard before saving)
+        onUpload(previewUrl);
+      }
     } catch (err) {
-      setError('Failed to upload logo');
+      setError(err instanceof Error ? err.message : 'Failed to upload logo');
       console.error('Upload error:', err);
     } finally {
       setUploading(false);

@@ -89,36 +89,121 @@ pnpm --filter @tapandstamp/admin typecheck
 pnpm --filter @tapandstamp/admin lint
 ```
 
+## API Integration (✅ Complete)
+
+The admin app now includes full API integration:
+
+### Implemented Features
+
+1. **POST /api/merchants** ✅
+   - Saves merchant and branding data to Supabase
+   - Generates stamp strip images (0..N) using `@tapandstamp/imaging`
+   - Uploads images to Supabase Storage
+   - Returns merchant ID and slug
+
+2. **POST /api/upload/logo** ✅
+   - Uploads logo to Supabase Storage
+   - Validates file type and size
+   - Returns public URL
+
+3. **Asset Generation** ✅
+   - Renders stamp strips for all counts (0..N)
+   - Generates both Apple (1125×432) and Google (1032×336) versions
+   - Uploads with version number for cache invalidation
+
+4. **QR Code Generation** ✅
+   - Generates Join QR codes on success page
+   - Template Stamp QR for reference
+   - Downloadable as PNG images
+
+5. **Success Flow** ✅
+   - Redirects to `/branding/success` after merchant creation
+   - Displays QR codes and merchant details
+   - Download options for QR codes
+
+See [API.md](./API.md) for detailed API documentation.
+
+## Setup Instructions
+
+### 1. Supabase Setup
+
+1. Create a Supabase project at [supabase.com](https://supabase.com)
+2. Run migrations:
+   ```bash
+   # Navigate to packages/db
+   cd packages/db
+
+   # Apply migrations to your Supabase project
+   # Use Supabase CLI or SQL editor
+   ```
+3. Create storage bucket:
+   - Bucket name: `tapandstamp`
+   - Set to public read access
+
+### 2. Environment Configuration
+
+Copy `.env.local.example` to `.env.local` and fill in values:
+
+```bash
+cp .env.local.example .env.local
+```
+
+Required variables:
+- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Public anon key
+- `SUPABASE_SERVICE_ROLE_KEY` - Service role key (server-side only)
+- `NEXT_PUBLIC_BASE_URL` - Base URL for QR codes (e.g., http://localhost:3000)
+
+### 3. Install Dependencies
+
+```bash
+# From repository root
+pnpm install
+```
+
+### 4. Build Dependencies
+
+```bash
+# Build core and imaging packages
+pnpm --filter @tapandstamp/core build
+pnpm --filter @tapandstamp/imaging build
+```
+
+### 5. Run Development Server
+
+```bash
+pnpm --filter @tapandstamp/admin dev
+```
+
+Visit http://localhost:3000/branding/new to create your first merchant!
+
 ## Next Steps
 
-### Immediate TODOs
+### Upcoming Features
 
-1. **API Integration** (`/api/merchants`)
-   - POST endpoint to save merchant and branding data
-   - Generate stamp strip images (0..N) using `@tapandstamp/imaging`
-   - Upload images to CDN/storage
-   - Create Apple PassKit template
-   - Create Google Wallet LoyaltyClass
-
-2. **Logo Upload Integration**
-   - Implement actual file upload to Supabase Storage
-   - Generate multiple sizes (logo.png, icon.png for PassKit)
-   - Return CDN URLs
-
-3. **Asset Generation**
-   - Call `renderStampStrip()` from `@tapandstamp/imaging` for each stamp count (0..N)
-   - Upload to storage: `stamps/<merchantSlug>/v<version>_<X>of<N>.png`
-   - Bump `branding_version` on updates to invalidate cache
-
-4. **QR Code Generation**
-   - Generate Join QR: `/add/:merchantSlug`
-   - Generate Stamp QR: `/stamp/:memberId` (per member)
-
-5. **Merchant Dashboard**
+1. **Merchant Dashboard**
    - List all merchants
    - Edit existing branding
    - View member stats
-   - Download QR code posters
+   - Regenerate assets
+
+2. **Poster Generator**
+   - PDF generation with branding and QR codes
+   - Printable Join and Stamp posters
+
+3. **Authentication**
+   - Admin login system
+   - Role-based access control
+
+4. **Apple PassKit Integration**
+   - `.pkpass` generation
+   - PassKit web service endpoints
+   - APNs push notifications
+
+5. **Google Wallet Integration**
+   - LoyaltyClass creation
+   - LoyaltyObject management
+   - JWT-based Save links
 
 ## Design System
 
