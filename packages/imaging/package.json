@@ -11,5 +11,12 @@
     "lint": "eslint 'src/**/*.ts'",
     "test": "jest",
     "coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@tapandstamp/core": "workspace:*",
+    "sharp": "^0.33.2"
+  },
+  "devDependencies": {
+    "@types/sharp": "^0.32.0"
   }
 }

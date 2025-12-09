@@ -1,9 +1,25 @@
+export interface StampConfig {
+  total: number;
+  shape: 'circle' | 'square';
+  filledColor: string;
+  emptyColor: string;
+  outlineColor: string;
+  overlayLogo: boolean;
+}
+
+export interface BackgroundConfig {
+  type: 'solid' | 'image';
+  color: string;
+  imageUrl?: string;
+}
+
 export interface Branding {
   logoUrl: string;
   primaryColor: string;
   secondaryColor: string;
   labelColor: string;
-  stampTotal: number;
+  background: BackgroundConfig;
+  stamp: StampConfig;
 }
 
 export interface Merchant {
