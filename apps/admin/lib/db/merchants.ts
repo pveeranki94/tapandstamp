@@ -105,11 +105,24 @@ export async function updateMerchantBranding(
   id: string,
   branding: Branding
 ): Promise<MerchantRow> {
+  // First get current version
+  const { data: current, error: fetchError } = await client
+    .from('merchants')
+    .select('branding_version')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch merchant: ${fetchError.message}`);
+  }
+
+  const newVersion = ((current as { branding_version: number })?.branding_version ?? 0) + 1;
+
   const { data, error } = await client
     .from('merchants')
     .update({
       branding,
-      branding_version: client.raw('branding_version + 1')
+      branding_version: newVersion
     })
     .eq('id', id)
     .select()

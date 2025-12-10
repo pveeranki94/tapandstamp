@@ -1,6 +1,10 @@
-import express from 'express';
+import 'dotenv/config';
+import express, { Express } from 'express';
+import addRouter from './routes/add.js';
+import stampRouter from './routes/stamp.js';
+import redeemRouter from './routes/redeem.js';
 
-export function createApp() {
+export function createApp(): Express {
   const app = express();
   app.use(express.json());
 
@@ -8,29 +12,10 @@ export function createApp() {
     res.json({ ok: true });
   });
 
-  app.get('/add/:merchantSlug', (req, res) => {
-    res.status(501).json({
-      error: 'Not implemented',
-      route: 'add',
-      merchantSlug: req.params.merchantSlug
-    });
-  });
-
-  app.get('/stamp/:memberId', (req, res) => {
-    res.status(501).json({
-      error: 'Not implemented',
-      route: 'stamp',
-      memberId: req.params.memberId
-    });
-  });
-
-  app.post('/redeem/:memberId', (req, res) => {
-    res.status(501).json({
-      error: 'Not implemented',
-      route: 'redeem',
-      memberId: req.params.memberId
-    });
-  });
+  // Mount route handlers
+  app.use('/add', addRouter);
+  app.use('/stamp', stampRouter);
+  app.use('/redeem', redeemRouter);
 
   return app;
 }

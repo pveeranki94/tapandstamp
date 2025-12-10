@@ -3,13 +3,23 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "main": "dist/apply.js",
-  "types": "dist/apply.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "lint": "eslint 'src/**/*.ts'",
     "test": "jest",
     "coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "@tapandstamp/core": "workspace:*"
   }
 }

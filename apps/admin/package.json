@@ -15,6 +15,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "@tapandstamp/core": "workspace:*",
+    "@tapandstamp/db": "workspace:*",
     "@tapandstamp/imaging": "workspace:*",
     "next": "^14.1.0",
     "qrcode": "^1.5.3",
@@ -22,6 +23,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@types/qrcode": "^1.5.5"
+    "@types/qrcode": "^1.5.5",
+    "dotenv": "^17.2.3"
   }
 }

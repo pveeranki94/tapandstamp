@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Branding } from '@tapandstamp/core';
-import { LogoUpload } from '../../../components/branding/LogoUpload';
+import { LogoUpload, type LogoData } from '../../../components/branding/LogoUpload';
 import { ColorPicker } from '../../../components/branding/ColorPicker';
 import { StampConfig } from '../../../components/branding/StampConfig';
 import { BrandingPreview } from '../../../components/branding/BrandingPreview';
@@ -13,6 +13,7 @@ export default function NewBrandingPage() {
   const [merchantName, setMerchantName] = useState('');
   const [merchantSlug, setMerchantSlug] = useState('');
   const [rewardGoal, setRewardGoal] = useState(8);
+  const [logoData, setLogoData] = useState<LogoData | null>(null);
   const [branding, setBranding] = useState<Branding>({
     logoUrl: '',
     primaryColor: '#6B4A3A',
@@ -42,6 +43,7 @@ export default function NewBrandingPage() {
   );
 
   // Check contrast between filled stamp and background
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const stampContrast = getContrastStatus(
     branding.stamp.filledColor,
     branding.background.color
@@ -79,7 +81,7 @@ export default function NewBrandingPage() {
       return;
     }
 
-    if (!branding.logoUrl) {
+    if (!logoData) {
       setError('Logo is required');
       return;
     }
@@ -99,7 +101,11 @@ export default function NewBrandingPage() {
           name: merchantName,
           slug: merchantSlug,
           rewardGoal,
-          branding
+          branding,
+          logoData: {
+            base64: logoData.base64,
+            contentType: logoData.contentType
+          }
         })
       });
 
@@ -182,7 +188,12 @@ export default function NewBrandingPage() {
             <h2>Logo</h2>
             <LogoUpload
               currentUrl={branding.logoUrl}
-              onUpload={(url) => updateBranding({ logoUrl: url })}
+              onUpload={(url, data) => {
+                updateBranding({ logoUrl: url });
+                if (data) {
+                  setLogoData(data);
+                }
+              }}
             />
           </section>
 

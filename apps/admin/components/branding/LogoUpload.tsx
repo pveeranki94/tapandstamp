@@ -3,9 +3,15 @@
 import { useState, useRef } from 'react';
 import styles from './LogoUpload.module.css';
 
+export interface LogoData {
+  previewUrl: string;
+  base64: string;
+  contentType: string;
+}
+
 interface LogoUploadProps {
   currentUrl: string;
-  onUpload: (url: string) => void;
+  onUpload: (url: string, logoData?: LogoData) => void;
   merchantSlug?: string;
 }
 
@@ -14,6 +20,20 @@ export function LogoUpload({ currentUrl, onUpload, merchantSlug }: LogoUploadPro
   const [preview, setPreview] = useState(currentUrl);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remove the data:image/...;base64, prefix to get raw base64
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+    });
+  };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -40,7 +60,15 @@ export function LogoUpload({ currentUrl, onUpload, merchantSlug }: LogoUploadPro
       const previewUrl = URL.createObjectURL(file);
       setPreview(previewUrl);
 
-      // If merchantSlug is provided, upload to storage
+      // Convert to base64 for later upload
+      const base64 = await fileToBase64(file);
+      const logoData: LogoData = {
+        previewUrl,
+        base64,
+        contentType: file.type
+      };
+
+      // If merchantSlug is provided, upload to storage immediately
       if (merchantSlug) {
         const formData = new FormData();
         formData.append('logo', file);
@@ -59,8 +87,8 @@ export function LogoUpload({ currentUrl, onUpload, merchantSlug }: LogoUploadPro
         const { url } = await response.json();
         onUpload(url);
       } else {
-        // Without merchantSlug, just use preview URL (for wizard before saving)
-        onUpload(previewUrl);
+        // Without merchantSlug, pass preview URL and logo data for later upload
+        onUpload(previewUrl, logoData);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload logo');

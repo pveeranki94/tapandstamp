@@ -3,13 +3,19 @@ import type { Branding } from '@tapandstamp/core';
 import { renderStampStrip } from '@tapandstamp/imaging';
 import { createServiceClient } from '../../../lib/supabase';
 import { createMerchant, getMerchantBySlug } from '../../../lib/db/merchants';
-import { uploadStampStrip } from '../../../lib/storage';
+import { uploadStampStrip, uploadLogo } from '../../../lib/storage';
+
+export interface LogoDataPayload {
+  base64: string;
+  contentType: string;
+}
 
 export interface CreateMerchantRequest {
   name: string;
   slug: string;
   rewardGoal: number;
   branding: Branding;
+  logoData?: LogoDataPayload;
 }
 
 export interface CreateMerchantResponse {
@@ -56,12 +62,30 @@ export async function POST(request: NextRequest) {
     const joinQrUrl = `${baseUrl}/add/${body.slug}`;
     const stampQrUrl = `${baseUrl}/stamp`;
 
+    // Upload logo to storage if provided
+    let logoUrl = body.branding.logoUrl;
+    if (body.logoData?.base64) {
+      const logoBuffer = Buffer.from(body.logoData.base64, 'base64');
+      logoUrl = await uploadLogo(
+        supabase,
+        body.slug,
+        logoBuffer,
+        body.logoData.contentType
+      );
+    }
+
+    // Update branding with the storage URL
+    const brandingWithLogo: Branding = {
+      ...body.branding,
+      logoUrl
+    };
+
     // Create merchant in database
     const merchant = await createMerchant(supabase, {
       slug: body.slug,
       name: body.name,
       rewardGoal: body.rewardGoal,
-      branding: body.branding,
+      branding: brandingWithLogo,
       joinQrUrl,
       stampQrUrl
     });

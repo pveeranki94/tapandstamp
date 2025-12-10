@@ -66,6 +66,7 @@ export async function deleteStampStrips(
   merchantSlug: string,
   version: number
 ): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const prefix = `stamps/${merchantSlug}/v${version}_`;
 
   const { data: files, error: listError } = await client.storage
