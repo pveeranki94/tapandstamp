@@ -7,6 +7,7 @@ export interface MemberInsert {
   merchantId: string;
   deviceType: DeviceType;
   walletEmail?: string;
+  name?: string;
 }
 
 export interface MemberRow {
@@ -14,6 +15,7 @@ export interface MemberRow {
   merchant_id: string;
   device_type: DeviceType;
   wallet_email: string | null;
+  name: string | null;
   stamp_count: number;
   reward_available: boolean;
   last_stamp_at: string | null;
@@ -50,6 +52,7 @@ export async function createMember(
       merchant_id: member.merchantId,
       device_type: member.deviceType,
       wallet_email: member.walletEmail || null,
+      name: member.name || null,
       stamp_count: 0,
       reward_available: false
     })
@@ -119,6 +122,7 @@ export async function getMemberWithMerchant(
       merchant_id: data.merchant_id,
       device_type: data.device_type,
       wallet_email: data.wallet_email,
+      name: data.name,
       stamp_count: data.stamp_count,
       reward_available: data.reward_available,
       last_stamp_at: data.last_stamp_at,

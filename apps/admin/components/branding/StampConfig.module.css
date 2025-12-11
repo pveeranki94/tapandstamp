@@ -17,7 +17,7 @@
 
 .shapeSelector {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
 }
 
@@ -60,6 +60,24 @@
   height: 40px;
   border: 3px solid currentColor;
   border-radius: 6px;
+}
+
+.logoPreview {
+  width: 40px;
+  height: 40px;
+  border: 3px solid currentColor;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, transparent 50%, currentColor 50%);
+  opacity: 0.8;
+}
+
+.logoPreview svg {
+  width: 24px;
+  height: 24px;
+  opacity: 0.7;
 }
 
 .checkboxLabel {

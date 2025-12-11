@@ -1,6 +1,6 @@
 export interface StampConfig {
   total: number;
-  shape: 'circle' | 'square';
+  shape: 'circle' | 'square' | 'logo';
   filledColor: string;
   emptyColor: string;
   outlineColor: string;

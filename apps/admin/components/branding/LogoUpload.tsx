@@ -41,15 +41,15 @@ export function LogoUpload({ currentUrl, onUpload, merchantSlug }: LogoUploadPro
 
     setError(null);
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file');
+    // Validate file type - SVG only
+    if (file.type !== 'image/svg+xml') {
+      setError('Please upload an SVG file. SVG format is required for best quality across all sizes.');
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB');
+    // Validate file size (max 1MB for SVG)
+    if (file.size > 1 * 1024 * 1024) {
+      setError('SVG file must be less than 1MB');
       return;
     }
 
@@ -115,7 +115,7 @@ export function LogoUpload({ currentUrl, onUpload, merchantSlug }: LogoUploadPro
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept=".svg,image/svg+xml"
         onChange={handleFileSelect}
         className={styles.hiddenInput}
       />
@@ -153,7 +153,7 @@ export function LogoUpload({ currentUrl, onUpload, merchantSlug }: LogoUploadPro
       {error && <div className={styles.error}>{error}</div>}
 
       <div className={styles.hint}>
-        Recommended: Square image, at least 300×300px, PNG or JPG format
+        Required: SVG format for best quality across all sizes. Square aspect ratio recommended.
       </div>
     </div>
   );

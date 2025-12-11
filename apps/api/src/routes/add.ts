@@ -8,11 +8,12 @@ const router: RouterType = Router();
 /**
  * Join flow: GET /add/:merchantSlug
  * 1. Look up merchant by slug
- * 2. Create member with stamp_count=0, device_type='web'
+ * 2. Create member with stamp_count=0, device_type='web', optional name
  * 3. Redirect to /card/:memberId
  */
 router.get('/:merchantSlug', async (req: Request, res: Response) => {
   const { merchantSlug } = req.params;
+  const name = req.query.name as string | undefined;
 
   try {
     const client = getSupabaseClient();
@@ -26,10 +27,11 @@ router.get('/:merchantSlug', async (req: Request, res: Response) => {
       });
     }
 
-    // Create new member
+    // Create new member with optional name
     const member = await createMember(client, {
       merchantId: merchant.id,
-      deviceType: 'web'
+      deviceType: 'web',
+      name: name?.trim() || undefined
     });
 
     // Get the admin app URL from environment or use default

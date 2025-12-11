@@ -37,21 +37,50 @@ export function BrandingPreview({ branding, count, merchantName }: BrandingPrevi
       const x = startX + i * (stampSize + spacing);
       const isFilled = i < previewCount;
 
-      stamps.push(
-        <div
-          key={i}
-          className={styles.stamp}
-          style={{
-            left: x,
-            top: startY,
-            width: stampSize,
-            height: stampSize,
-            backgroundColor: isFilled ? stamp.filledColor : stamp.emptyColor,
-            border: `2px solid ${stamp.outlineColor}`,
-            borderRadius: stamp.shape === 'circle' ? '50%' : '4px'
-          }}
-        />
-      );
+      // For logo shape, render the logo with opacity
+      if (stamp.shape === 'logo' && branding.logoUrl) {
+        stamps.push(
+          <div
+            key={i}
+            className={`${styles.stamp} ${styles.logoStamp} ${isFilled ? styles.logoStampFilled : ''}`}
+            style={{
+              left: x,
+              top: startY,
+              width: stampSize,
+              height: stampSize,
+            }}
+          >
+            <img
+              src={branding.logoUrl}
+              alt=""
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                opacity: isFilled ? 1 : 0.2,
+                filter: isFilled ? 'none' : 'grayscale(100%)',
+                transition: 'opacity 0.3s, filter 0.3s'
+              }}
+            />
+          </div>
+        );
+      } else {
+        stamps.push(
+          <div
+            key={i}
+            className={styles.stamp}
+            style={{
+              left: x,
+              top: startY,
+              width: stampSize,
+              height: stampSize,
+              backgroundColor: isFilled ? stamp.filledColor : stamp.emptyColor,
+              border: `2px solid ${stamp.outlineColor}`,
+              borderRadius: stamp.shape === 'circle' ? '50%' : '4px'
+            }}
+          />
+        );
+      }
     }
 
     return stamps;

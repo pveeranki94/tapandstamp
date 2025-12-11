@@ -58,9 +58,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate URLs
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const joinQrUrl = `${baseUrl}/add/${body.slug}`;
-    const stampQrUrl = `${baseUrl}/stamp`;
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const adminBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:3001';
+    // Join QR points to admin app's join page for name collection
+    const joinQrUrl = `${adminBaseUrl}/join/${body.slug}`;
+    // Stamp QR points to API (member ID appended at runtime)
+    const stampQrUrl = `${apiBaseUrl}/stamp`;
 
     // Upload logo to storage if provided
     let logoUrl = body.branding.logoUrl;
@@ -94,18 +97,26 @@ export async function POST(request: NextRequest) {
     const stampTotal = body.branding.stamp.total;
     const uploadPromises = [];
 
+    // For logo shape stamps, we need the logo buffer
+    let logoBuffer: Buffer | undefined;
+    if (body.branding.stamp.shape === 'logo' && body.logoData?.base64) {
+      logoBuffer = Buffer.from(body.logoData.base64, 'base64');
+    }
+
     for (let count = 0; count <= stampTotal; count++) {
       // Generate stamp strip image for this count
       const appleResult = await renderStampStrip({
         branding: body.branding,
         count,
-        platform: 'apple'
+        platform: 'apple',
+        logoBuffer
       });
 
       const googleResult = await renderStampStrip({
         branding: body.branding,
         count,
-        platform: 'google'
+        platform: 'google',
+        logoBuffer
       });
 
       // Upload both platform versions

@@ -11,6 +11,7 @@ import './card.css';
 interface CardData {
   member: {
     id: string;
+    name: string | null;
     stampCount: number;
     rewardAvailable: boolean;
     lastStampAt: string | null;
@@ -42,7 +43,10 @@ export default function StampCardPage() {
 
   const fetchCardData = useCallback(async () => {
     try {
-      const response = await fetch(`/api/card/${memberId}`);
+      // Add cache-busting timestamp to prevent stale data
+      const response = await fetch(`/api/card/${memberId}?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
       if (!response.ok) {
         if (response.status === 404) {
           throw new Error('Card not found');
@@ -62,13 +66,15 @@ export default function StampCardPage() {
     fetchCardData();
   }, [fetchCardData]);
 
-  // Handle URL params for messages
+  // Handle URL params for messages and refresh data
   useEffect(() => {
     const stamped = searchParams.get('stamped');
     const errorType = searchParams.get('error');
     const remaining = searchParams.get('remaining');
 
     if (stamped === 'true') {
+      // Refetch card data to show updated stamp count
+      fetchCardData();
       setMessage({ type: 'success', text: '✓ Stamp collected!' });
       // Clear message after 5 seconds
       const timer = setTimeout(() => setMessage(undefined), 5000);
@@ -91,7 +97,7 @@ export default function StampCardPage() {
         text: 'Redeem your reward first before collecting more stamps'
       });
     }
-  }, [searchParams]);
+  }, [searchParams, fetchCardData]);
 
   const handleRedeem = async () => {
     if (!cardData || isRedeeming) return;
@@ -153,6 +159,7 @@ export default function StampCardPage() {
       <main className={styles.main}>
         <StampCardDisplay
           merchantName={merchant.name}
+          memberName={member.name}
           stampCount={member.stampCount}
           rewardGoal={merchant.rewardGoal}
           rewardAvailable={member.rewardAvailable}

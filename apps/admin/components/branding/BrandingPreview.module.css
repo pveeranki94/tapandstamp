@@ -105,6 +105,31 @@
   transition: all 0.2s;
 }
 
+.logoStamp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.logoStampFilled {
+  animation: logoAppear 0.4s ease-out;
+}
+
+@keyframes logoAppear {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .countText {
   position: absolute;
   bottom: 16px;

@@ -22,18 +22,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
+    // Validate file type - SVG only
+    if (file.type !== 'image/svg+xml') {
       return NextResponse.json(
-        { error: 'File must be an image' },
+        { error: 'Logo must be an SVG file' },
         { status: 400 }
       );
     }
 
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size (1MB max for SVG)
+    if (file.size > 1 * 1024 * 1024) {
       return NextResponse.json(
-        { error: 'File size must be less than 5MB' },
+        { error: 'SVG file size must be less than 1MB' },
         { status: 400 }
       );
     }
@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
 
     // Upload to Supabase Storage
     const supabase = createServiceClient();
-    const path = `logos/${slug}/logo.png`;
-    const url = await uploadFile(supabase, path, buffer, file.type);
+    const path = `logos/${slug}/logo.svg`;
+    const url = await uploadFile(supabase, path, buffer, 'image/svg+xml');
 
     return NextResponse.json({
       success: true,

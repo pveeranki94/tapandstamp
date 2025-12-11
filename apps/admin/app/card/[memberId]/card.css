@@ -28,6 +28,12 @@
   font-weight: 700;
 }
 
+.stamp-card-member-name {
+  margin: 4px 0 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
 .stamp-card-message {
   padding: 12px 16px;
   border-radius: 12px;
@@ -78,6 +84,8 @@
 
 .stamp-slot {
   aspect-ratio: 1;
+  min-width: 40px;
+  min-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -92,6 +100,57 @@
 
 .stamp-slot--square {
   border-radius: 8px;
+}
+
+.stamp-slot--logo {
+  border: none;
+  background: transparent;
+  overflow: hidden;
+}
+
+.stamp-slot--logo-empty {
+  opacity: 1;
+}
+
+.stamp-slot--logo-filled {
+  animation: logoStampAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.stamp-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+}
+
+.stamp-logo-img--empty {
+  opacity: 0.15;
+  filter: grayscale(100%);
+  transform: scale(0.9);
+}
+
+.stamp-logo-img--filled {
+  opacity: 1;
+  filter: none;
+  transform: scale(1);
+}
+
+@keyframes logoStampAppear {
+  0% {
+    transform: scale(0.3) rotate(-15deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(5deg);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.95) rotate(-2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 .stamp-slot--filled {
@@ -192,17 +251,31 @@
   opacity: 0.8;
 }
 
-.stamp-instruction {
+.stamp-qr-section {
   text-align: center;
-  margin-top: 20px;
-  padding-top: 20px;
+  margin-top: 24px;
+  padding-top: 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.stamp-instruction p {
+.stamp-qr-code {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.stamp-qr-code img {
+  width: 150px;
+  height: 150px;
+  border-radius: 12px;
+  background: white;
+  padding: 8px;
+}
+
+.stamp-instruction {
   margin: 0;
-  font-size: 13px;
-  opacity: 0.7;
+  font-size: 14px;
+  opacity: 0.9;
 }
 
 /* Add to Home Screen prompt styles */

@@ -41,6 +41,20 @@ export function StampConfig({ stamp, backgroundColor, onChange }: StampConfigPro
             <div className={styles.squarePreview} />
             Square
           </button>
+          <button
+            type="button"
+            onClick={() => onChange({ shape: 'logo' })}
+            className={`${styles.shapeButton} ${
+              stamp.shape === 'logo' ? styles.active : ''
+            }`}
+          >
+            <div className={styles.logoPreview}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            Logo
+          </button>
         </div>
       </div>
 

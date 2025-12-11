@@ -1,9 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import QRCode from 'qrcode';
 import type { Branding } from '@tapandstamp/core';
 
 interface StampCardDisplayProps {
   merchantName: string;
+  memberName?: string | null;
   stampCount: number;
   rewardGoal: number;
   rewardAvailable: boolean;
@@ -19,6 +22,7 @@ interface StampCardDisplayProps {
 
 export function StampCardDisplay({
   merchantName,
+  memberName,
   stampCount,
   rewardGoal,
   rewardAvailable,
@@ -28,7 +32,35 @@ export function StampCardDisplay({
   onRedeem,
   isRedeeming
 }: StampCardDisplayProps) {
-  const { stamp, background, primaryColor, labelColor, logoUrl } = branding;
+  // Default values for branding properties
+  const background = branding?.background || { color: '#FFFFFF' };
+  const primaryColor = branding?.primaryColor || '#6366f1';
+  const labelColor = branding?.labelColor || '#333333';
+  const logoUrl = branding?.logoUrl;
+
+  // Default stamp config if not provided
+  const stamp = branding?.stamp || {
+    shape: 'circle' as const,
+    filledColor: '#4CAF50',
+    emptyColor: '#E0E0E0',
+    outlineColor: '#BDBDBD'
+  };
+
+  // Generate QR code for cashier to scan
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (stampQrUrl) {
+      QRCode.toDataURL(stampQrUrl, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      }).then(setQrCodeDataUrl).catch(console.error);
+    }
+  }, [stampQrUrl]);
 
   return (
     <div
@@ -48,6 +80,11 @@ export function StampCardDisplay({
         <h1 className="stamp-card-title" style={{ color: labelColor }}>
           {merchantName}
         </h1>
+        {memberName && (
+          <p className="stamp-card-member-name" style={{ color: labelColor, opacity: 0.8 }}>
+            {memberName}
+          </p>
+        )}
       </div>
 
       {/* Message Banner */}
@@ -61,6 +98,24 @@ export function StampCardDisplay({
       <div className="stamp-grid">
         {Array.from({ length: rewardGoal }).map((_, index) => {
           const isFilled = index < stampCount;
+
+          // Logo shape: render logo images with opacity transition
+          if (stamp.shape === 'logo' && logoUrl) {
+            return (
+              <div
+                key={index}
+                className={`stamp-slot stamp-slot--logo ${isFilled ? 'stamp-slot--logo-filled' : 'stamp-slot--logo-empty'}`}
+              >
+                <img
+                  src={logoUrl}
+                  alt=""
+                  className={`stamp-logo-img ${isFilled ? 'stamp-logo-img--filled' : 'stamp-logo-img--empty'}`}
+                />
+              </div>
+            );
+          }
+
+          // Circle/Square shapes: render colored slots with checkmark
           return (
             <div
               key={index}
@@ -116,10 +171,17 @@ export function StampCardDisplay({
         </div>
       )}
 
-      {/* Stamp QR Instruction */}
+      {/* Stamp QR Code - Show to cashier */}
       {stampQrUrl && !rewardAvailable && (
-        <div className="stamp-instruction" style={{ color: labelColor }}>
-          <p>Scan the QR code at the counter to collect stamps</p>
+        <div className="stamp-qr-section">
+          {qrCodeDataUrl && (
+            <div className="stamp-qr-code">
+              <img src={qrCodeDataUrl} alt="Scan to collect stamp" />
+            </div>
+          )}
+          <p className="stamp-instruction" style={{ color: labelColor }}>
+            Show this QR code to the cashier to collect your stamp
+          </p>
         </div>
       )}
     </div>
