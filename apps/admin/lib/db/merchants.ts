@@ -10,6 +10,12 @@ export interface MerchantInsert {
   stampQrUrl: string;
 }
 
+export interface MerchantUpdate {
+  name?: string;
+  rewardGoal?: number;
+  branding?: Branding;
+}
+
 export interface MerchantRow {
   id: string;
   slug: string;
@@ -130,6 +136,102 @@ export async function updateMerchantBranding(
 
   if (error) {
     throw new Error(`Failed to update merchant branding: ${error.message}`);
+  }
+
+  return data as MerchantRow;
+}
+
+/**
+ * List all merchants with optional pagination
+ */
+export async function listMerchants(
+  client: SupabaseClient,
+  options?: { limit?: number; offset?: number }
+): Promise<{ merchants: MerchantRow[]; total: number }> {
+  const limit = options?.limit ?? 50;
+  const offset = options?.offset ?? 0;
+
+  // Get total count
+  const { count, error: countError } = await client
+    .from('merchants')
+    .select('*', { count: 'exact', head: true });
+
+  if (countError) {
+    throw new Error(`Failed to count merchants: ${countError.message}`);
+  }
+
+  // Get paginated results
+  const { data, error } = await client
+    .from('merchants')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    throw new Error(`Failed to list merchants: ${error.message}`);
+  }
+
+  return {
+    merchants: data as MerchantRow[],
+    total: count ?? 0
+  };
+}
+
+/**
+ * Update merchant (name, rewardGoal, and/or branding)
+ * If branding is updated, increments branding_version
+ */
+export async function updateMerchant(
+  client: SupabaseClient,
+  id: string,
+  updates: MerchantUpdate
+): Promise<MerchantRow> {
+  // Build update object
+  const updateData: Record<string, unknown> = {};
+
+  if (updates.name !== undefined) {
+    updateData.name = updates.name;
+  }
+
+  if (updates.rewardGoal !== undefined) {
+    updateData.reward_goal = updates.rewardGoal;
+  }
+
+  // If branding is being updated, increment version
+  if (updates.branding !== undefined) {
+    const { data: current, error: fetchError } = await client
+      .from('merchants')
+      .select('branding_version')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      throw new Error(`Failed to fetch merchant: ${fetchError.message}`);
+    }
+
+    const newVersion = ((current as { branding_version: number })?.branding_version ?? 0) + 1;
+    updateData.branding = updates.branding;
+    updateData.branding_version = newVersion;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    // No updates, just return current merchant
+    const merchant = await getMerchantById(client, id);
+    if (!merchant) {
+      throw new Error('Merchant not found');
+    }
+    return merchant;
+  }
+
+  const { data, error } = await client
+    .from('merchants')
+    .update(updateData)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update merchant: ${error.message}`);
   }
 
   return data as MerchantRow;

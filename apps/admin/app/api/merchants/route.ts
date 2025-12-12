@@ -2,8 +2,38 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { Branding } from '@tapandstamp/core';
 import { renderStampStrip } from '@tapandstamp/imaging';
 import { createServiceClient } from '../../../lib/supabase';
-import { createMerchant, getMerchantBySlug } from '../../../lib/db/merchants';
+import { createMerchant, getMerchantBySlug, listMerchants } from '../../../lib/db/merchants';
 import { uploadStampStrip, uploadLogo } from '../../../lib/storage';
+
+/**
+ * GET /api/merchants - List all merchants
+ */
+export async function GET() {
+  try {
+    const supabase = createServiceClient();
+    const { merchants, total } = await listMerchants(supabase);
+
+    return NextResponse.json({
+      merchants: merchants.map((m) => ({
+        id: m.id,
+        slug: m.slug,
+        name: m.name,
+        rewardGoal: m.reward_goal,
+        brandingVersion: m.branding_version,
+        logoUrl: m.branding?.logoUrl,
+        primaryColor: m.branding?.primaryColor,
+        createdAt: m.created_at
+      })),
+      total
+    });
+  } catch (error) {
+    console.error('Error listing merchants:', error);
+    return NextResponse.json(
+      { error: 'Failed to list merchants' },
+      { status: 500 }
+    );
+  }
+}
 
 export interface LogoDataPayload {
   base64: string;

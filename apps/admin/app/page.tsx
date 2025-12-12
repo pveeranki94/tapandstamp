@@ -16,11 +16,11 @@ export default function AdminHome() {
           <span className={styles.arrow}>→</span>
         </Link>
 
-        <div className={styles.card + ' ' + styles.disabled}>
+        <Link href="/merchants" className={styles.card}>
           <h2>Manage Merchants</h2>
           <p>View and edit existing merchants</p>
-          <span className={styles.comingSoon}>Coming Soon</span>
-        </div>
+          <span className={styles.arrow}>→</span>
+        </Link>
 
         <div className={styles.card + ' ' + styles.disabled}>
           <h2>Analytics</h2>
