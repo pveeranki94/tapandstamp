@@ -31,16 +31,18 @@ export async function uploadFile(
 }
 
 /**
- * Upload logo SVG and return public URL
+ * Upload logo (SVG or PNG) and return public URL
  */
 export async function uploadLogo(
   client: SupabaseClient,
   merchantSlug: string,
   logoBuffer: Buffer,
-  contentType: string = 'image/svg+xml'
+  contentType: string = 'image/svg+xml',
+  filename: string = 'logo'
 ): Promise<string> {
-  // Always use .svg extension for logos
-  const path = `logos/${merchantSlug}/logo.svg`;
+  // Determine extension based on content type
+  const extension = contentType === 'image/png' ? 'png' : 'svg';
+  const path = `logos/${merchantSlug}/${filename}.${extension}`;
   return uploadFile(client, path, logoBuffer, contentType);
 }
 

@@ -15,6 +15,7 @@ export interface BackgroundConfig {
 
 export interface Branding {
   logoUrl: string;
+  headerLogoUrl?: string;
   primaryColor: string;
   secondaryColor: string;
   labelColor: string;

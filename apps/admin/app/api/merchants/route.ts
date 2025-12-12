@@ -16,6 +16,7 @@ export interface CreateMerchantRequest {
   rewardGoal: number;
   branding: Branding;
   logoData?: LogoDataPayload;
+  headerLogoData?: LogoDataPayload;
 }
 
 export interface CreateMerchantResponse {
@@ -77,10 +78,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update branding with the storage URL
+    // Upload header logo to storage if provided
+    let headerLogoUrl = body.branding.headerLogoUrl;
+    if (body.headerLogoData?.base64) {
+      const headerLogoBuffer = Buffer.from(body.headerLogoData.base64, 'base64');
+      headerLogoUrl = await uploadLogo(
+        supabase,
+        body.slug,
+        headerLogoBuffer,
+        body.headerLogoData.contentType,
+        'header-logo'
+      );
+    }
+
+    // Update branding with the storage URLs
     const brandingWithLogo: Branding = {
       ...body.branding,
-      logoUrl
+      logoUrl,
+      headerLogoUrl
     };
 
     // Create merchant in database

@@ -52,8 +52,14 @@
 .section h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   color: #111827;
+}
+
+.fieldHint {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0 0 1rem;
 }
 
 .field {
@@ -97,6 +103,73 @@
   position: sticky;
   top: 2rem;
   height: fit-content;
+  background: #f3f4f6;
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.previewHeader {
+  margin-bottom: 1rem;
+}
+
+.previewHeader h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.previewCard {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.previewControls {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.controlLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #e5e7eb;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  background: #2563eb;
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: none;
 }
 
 .actions {

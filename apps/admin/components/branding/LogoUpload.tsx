@@ -41,15 +41,17 @@ export function LogoUpload({ currentUrl, onUpload, merchantSlug }: LogoUploadPro
 
     setError(null);
 
-    // Validate file type - SVG only
-    if (file.type !== 'image/svg+xml') {
-      setError('Please upload an SVG file. SVG format is required for best quality across all sizes.');
+    // Validate file type - SVG or PNG
+    const allowedTypes = ['image/svg+xml', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Please upload an SVG or PNG file. SVG is preferred for best quality.');
       return;
     }
 
-    // Validate file size (max 1MB for SVG)
-    if (file.size > 1 * 1024 * 1024) {
-      setError('SVG file must be less than 1MB');
+    // Validate file size (max 1MB for SVG, 2MB for PNG)
+    const maxSize = file.type === 'image/svg+xml' ? 1 * 1024 * 1024 : 2 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError(`File must be less than ${file.type === 'image/svg+xml' ? '1MB' : '2MB'}`);
       return;
     }
 
@@ -115,7 +117,7 @@ export function LogoUpload({ currentUrl, onUpload, merchantSlug }: LogoUploadPro
       <input
         ref={fileInputRef}
         type="file"
-        accept=".svg,image/svg+xml"
+        accept=".svg,.png,image/svg+xml,image/png"
         onChange={handleFileSelect}
         className={styles.hiddenInput}
       />
@@ -153,7 +155,7 @@ export function LogoUpload({ currentUrl, onUpload, merchantSlug }: LogoUploadPro
       {error && <div className={styles.error}>{error}</div>}
 
       <div className={styles.hint}>
-        Required: SVG format for best quality across all sizes. Square aspect ratio recommended.
+        SVG or PNG format. SVG preferred for best quality across all sizes. Square aspect ratio recommended.
       </div>
     </div>
   );

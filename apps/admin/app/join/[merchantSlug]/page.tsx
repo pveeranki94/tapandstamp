@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { getContrastTextColor } from '../../../lib/color-utils';
 import styles from './page.module.css';
 
 interface MerchantInfo {
@@ -18,11 +19,11 @@ interface MerchantInfo {
 
 export default function JoinPage() {
   const params = useParams();
-  const router = useRouter();
   const merchantSlug = params.merchantSlug as string;
 
   const [merchant, setMerchant] = useState<MerchantInfo | null>(null);
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,10 +59,13 @@ export default function JoinPage() {
     setJoining(true);
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-      const nameParam = name.trim() ? `?name=${encodeURIComponent(name.trim())}` : '';
+      const params = new URLSearchParams();
+      if (name.trim()) params.set('name', name.trim());
+      if (email.trim()) params.set('email', email.trim());
+      const queryString = params.toString() ? `?${params.toString()}` : '';
 
       // Navigate to API which will create member and redirect to card
-      window.location.href = `${apiBaseUrl}/add/${merchantSlug}${nameParam}`;
+      window.location.href = `${apiBaseUrl}/add/${merchantSlug}${queryString}`;
     } catch {
       setError('Failed to join. Please try again.');
       setJoining(false);
@@ -91,6 +95,7 @@ export default function JoinPage() {
   }
 
   const { branding } = merchant;
+  const buttonTextColor = getContrastTextColor(branding.primaryColor);
 
   return (
     <div
@@ -134,11 +139,30 @@ export default function JoinPage() {
             </p>
           </div>
 
+          <div className={styles.inputGroup}>
+            <label htmlFor="email" className={styles.label} style={{ color: branding.labelColor }}>
+              Email (optional)
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              className={styles.input}
+              maxLength={100}
+              autoComplete="email"
+            />
+            <p className={styles.hint} style={{ color: branding.labelColor }}>
+              Receive news and updates from {merchant.name}
+            </p>
+          </div>
+
           <button
             type="submit"
             disabled={joining}
             className={styles.joinButton}
-            style={{ backgroundColor: branding.primaryColor }}
+            style={{ backgroundColor: branding.primaryColor, color: buttonTextColor }}
           >
             {joining ? 'Joining...' : 'Get My Stamp Card'}
           </button>

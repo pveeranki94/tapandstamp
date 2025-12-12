@@ -21,7 +21,7 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } | nul
  * Calculate relative luminance for WCAG contrast calculations
  * https://www.w3.org/TR/WCAG20/#relativeluminancedef
  */
-function getLuminance(r: number, g: number, b: number): number {
+export function getLuminance(r: number, g: number, b: number): number {
   const [rs, gs, bs] = [r, g, b].map((c) => {
     c = c / 255;
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
@@ -125,4 +125,19 @@ export function isValidHexColor(color: string): boolean {
  */
 export function normalizeHexColor(color: string): string {
   return color.startsWith('#') ? color : `#${color}`;
+}
+
+/**
+ * Determine whether black or white text provides better contrast
+ * against a given background color.
+ * Uses the luminance threshold of 0.179 (W3C recommendation)
+ */
+export function getContrastTextColor(backgroundColor: string): '#000000' | '#FFFFFF' {
+  const rgb = hexToRgb(backgroundColor);
+  if (!rgb) return '#000000';
+
+  const luminance = getLuminance(rgb.r, rgb.g, rgb.b);
+  // If background is light (high luminance), use black text
+  // If background is dark (low luminance), use white text
+  return luminance > 0.179 ? '#000000' : '#FFFFFF';
 }

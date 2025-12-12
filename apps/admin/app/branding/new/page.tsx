@@ -5,15 +5,17 @@ import type { Branding } from '@tapandstamp/core';
 import { LogoUpload, type LogoData } from '../../../components/branding/LogoUpload';
 import { ColorPicker } from '../../../components/branding/ColorPicker';
 import { StampConfig } from '../../../components/branding/StampConfig';
-import { BrandingPreview } from '../../../components/branding/BrandingPreview';
+import { StampCardDisplay } from '../../../components/card/StampCardDisplay';
 import { getContrastStatus } from '../../../lib/color-utils';
 import styles from './page.module.css';
+import '../../../app/card/[memberId]/card.css';
 
 export default function NewBrandingPage() {
   const [merchantName, setMerchantName] = useState('');
   const [merchantSlug, setMerchantSlug] = useState('');
   const [rewardGoal, setRewardGoal] = useState(8);
   const [logoData, setLogoData] = useState<LogoData | null>(null);
+  const [headerLogoData, setHeaderLogoData] = useState<LogoData | null>(null);
   const [branding, setBranding] = useState<Branding>({
     logoUrl: '',
     primaryColor: '#6B4A3A',
@@ -35,6 +37,7 @@ export default function NewBrandingPage() {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previewStampCount, setPreviewStampCount] = useState(3);
 
   // Check contrast between label color and background
   const labelContrast = getContrastStatus(
@@ -105,7 +108,11 @@ export default function NewBrandingPage() {
           logoData: {
             base64: logoData.base64,
             contentType: logoData.contentType
-          }
+          },
+          headerLogoData: headerLogoData ? {
+            base64: headerLogoData.base64,
+            contentType: headerLogoData.contentType
+          } : undefined
         })
       });
 
@@ -185,13 +192,33 @@ export default function NewBrandingPage() {
 
           {/* Logo Upload */}
           <section className={styles.section}>
-            <h2>Logo</h2>
+            <h2>Stamp Logo</h2>
+            <p className={styles.fieldHint}>
+              This logo is used for stamp shapes and wallet pass icons.
+            </p>
             <LogoUpload
               currentUrl={branding.logoUrl}
               onUpload={(url, data) => {
                 updateBranding({ logoUrl: url });
                 if (data) {
                   setLogoData(data);
+                }
+              }}
+            />
+          </section>
+
+          {/* Header Logo Upload (Optional) */}
+          <section className={styles.section}>
+            <h2>Header Logo (Optional)</h2>
+            <p className={styles.fieldHint}>
+              Displayed at the top left of the stamp card. If not provided, the merchant name will be shown instead.
+            </p>
+            <LogoUpload
+              currentUrl={branding.headerLogoUrl || ''}
+              onUpload={(url, data) => {
+                updateBranding({ headerLogoUrl: url || undefined });
+                if (data) {
+                  setHeaderLogoData(data);
                 }
               }}
             />
@@ -252,7 +279,33 @@ export default function NewBrandingPage() {
 
         {/* Live Preview */}
         <div className={styles.preview}>
-          <BrandingPreview branding={branding} count={3} merchantName={merchantName || 'Your Cafe'} />
+          <div className={styles.previewHeader}>
+            <h3>Live Preview</h3>
+          </div>
+          <div className={styles.previewCard}>
+            <StampCardDisplay
+              merchantName={merchantName || 'Your Cafe'}
+              memberName="Jane Doe"
+              stampCount={previewStampCount}
+              rewardGoal={rewardGoal}
+              rewardAvailable={previewStampCount >= rewardGoal}
+              branding={branding}
+              rewardMessage={`Buy ${rewardGoal} coffees, get your next on us.`}
+            />
+          </div>
+          <div className={styles.previewControls}>
+            <label className={styles.controlLabel}>
+              Preview Stamps: {previewStampCount} / {rewardGoal}
+            </label>
+            <input
+              type="range"
+              min={0}
+              max={rewardGoal}
+              value={previewStampCount}
+              onChange={(e) => setPreviewStampCount(parseInt(e.target.value, 10))}
+              className={styles.slider}
+            />
+          </div>
         </div>
       </div>
     </div>

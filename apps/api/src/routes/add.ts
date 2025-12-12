@@ -14,6 +14,7 @@ const router: RouterType = Router();
 router.get('/:merchantSlug', async (req: Request, res: Response) => {
   const { merchantSlug } = req.params;
   const name = req.query.name as string | undefined;
+  const email = req.query.email as string | undefined;
 
   try {
     const client = getSupabaseClient();
@@ -27,11 +28,12 @@ router.get('/:merchantSlug', async (req: Request, res: Response) => {
       });
     }
 
-    // Create new member with optional name
+    // Create new member with optional name and email
     const member = await createMember(client, {
       merchantId: merchant.id,
       deviceType: 'web',
-      name: name?.trim() || undefined
+      name: name?.trim() || undefined,
+      walletEmail: email?.trim() || undefined
     });
 
     // Get the admin app URL from environment or use default
