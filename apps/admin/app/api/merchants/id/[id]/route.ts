@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Branding } from '@tapandstamp/core';
 import { renderStampStrip } from '@tapandstamp/imaging';
-import { createServiceClient } from '../../../../../lib/supabase';
+import { createAdminClient } from '../../../../../lib/supabase/admin';
+import { validateSession, requireMerchantAccess } from '../../../../../lib/auth/api';
 import { getMerchantById, updateMerchant } from '../../../../../lib/db/merchants';
 import { uploadStampStrip, uploadLogo } from '../../../../../lib/storage';
 
@@ -26,10 +27,20 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Validate session
+  const authResult = await validateSession();
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+
   try {
     const { id } = await params;
-    const client = createServiceClient();
 
+    // Check merchant access
+    const accessDenied = requireMerchantAccess(authResult, id);
+    if (accessDenied) return accessDenied;
+
+    const client = createAdminClient();
     const merchant = await getMerchantById(client, id);
 
     if (!merchant) {
@@ -66,10 +77,21 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Validate session
+  const authResult = await validateSession();
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+
   try {
     const { id } = await params;
+
+    // Check merchant access
+    const accessDenied = requireMerchantAccess(authResult, id);
+    if (accessDenied) return accessDenied;
+
     const body: UpdateMerchantRequest = await request.json();
-    const supabase = createServiceClient();
+    const supabase = createAdminClient();
 
     // Get current merchant to check it exists and get slug for uploads
     const currentMerchant = await getMerchantById(supabase, id);
@@ -81,7 +103,7 @@ export async function PUT(
     }
 
     // Handle logo uploads if provided
-    let updatedBranding = body.branding;
+    const updatedBranding = body.branding;
     if (updatedBranding) {
       // Upload new logo if provided
       if (body.logoData?.base64) {

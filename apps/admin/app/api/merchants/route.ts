@@ -1,20 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Branding } from '@tapandstamp/core';
 import { renderStampStrip } from '@tapandstamp/imaging';
-import { createServiceClient } from '../../../lib/supabase';
-import { createMerchant, getMerchantBySlug, listMerchants } from '../../../lib/db/merchants';
+import { createAdminClient } from '../../../lib/supabase/admin';
+import { validateSession } from '../../../lib/auth/api';
+import { createMerchant, getMerchantBySlug } from '../../../lib/db/merchants';
 import { uploadStampStrip, uploadLogo } from '../../../lib/storage';
 
 /**
- * GET /api/merchants - List all merchants
+ * GET /api/merchants - List merchants accessible by current user
  */
 export async function GET() {
+  // Validate session
+  const authResult = await validateSession();
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+
   try {
-    const supabase = createServiceClient();
-    const { merchants, total } = await listMerchants(supabase);
+    const supabase = createAdminClient();
+
+    // Only fetch merchants the user has access to
+    if (authResult.merchantIds.length === 0) {
+      return NextResponse.json({ merchants: [], total: 0 });
+    }
+
+    const { data: merchants, error } = await supabase
+      .from('merchants')
+      .select('*')
+      .in('id', authResult.merchantIds)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
 
     return NextResponse.json({
-      merchants: merchants.map((m) => ({
+      merchants: (merchants ?? []).map((m) => ({
         id: m.id,
         slug: m.slug,
         name: m.name,
@@ -24,7 +43,7 @@ export async function GET() {
         primaryColor: m.branding?.primaryColor,
         createdAt: m.created_at
       })),
-      total
+      total: merchants?.length ?? 0
     });
   } catch (error) {
     console.error('Error listing merchants:', error);
@@ -57,6 +76,12 @@ export interface CreateMerchantResponse {
 }
 
 export async function POST(request: NextRequest) {
+  // Validate session
+  const authResult = await validateSession();
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+
   try {
     const body: CreateMerchantRequest = await request.json();
 
@@ -77,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Supabase service client
-    const supabase = createServiceClient();
+    const supabase = createAdminClient();
 
     // Check if slug already exists
     const existing = await getMerchantBySlug(supabase, body.slug);
@@ -190,6 +215,13 @@ export async function POST(request: NextRequest) {
 
     // Wait for all uploads to complete
     await Promise.all(uploadPromises);
+
+    // Auto-assign merchant to creating user
+    await supabase.from('user_merchants').insert({
+      user_id: authResult.user.id,
+      merchant_id: merchant.id,
+      role: 'admin'
+    });
 
     // Return success response
     const response: CreateMerchantResponse = {

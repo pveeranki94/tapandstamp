@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Branding } from '@tapandstamp/core';
 import { LogoUpload, type LogoData } from '../../../components/branding/LogoUpload';
@@ -9,7 +9,9 @@ import { ColorPicker } from '../../../components/branding/ColorPicker';
 import { StampConfig } from '../../../components/branding/StampConfig';
 import { StampCardDisplay } from '../../../components/card/StampCardDisplay';
 import { getContrastStatus } from '../../../lib/color-utils';
-import styles from './page.module.css';
+import { AdminHeader } from '../../../components/admin/AdminHeader';
+import { Button } from '../../../components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import '../../card/[memberId]/card.css';
 
 interface MerchantData {
@@ -26,7 +28,6 @@ interface MerchantData {
 
 export default function EditMerchantPage() {
   const params = useParams();
-  const router = useRouter();
   const merchantId = params.id as string;
 
   const [loading, setLoading] = useState(true);
@@ -71,10 +72,13 @@ export default function EditMerchantPage() {
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
-          <p>Loading merchant...</p>
+      <div className="min-h-screen bg-background">
+        <AdminHeader />
+        <div className="flex items-center justify-center py-24">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading merchant...</p>
+          </div>
         </div>
       </div>
     );
@@ -82,13 +86,16 @@ export default function EditMerchantPage() {
 
   if (error && !branding) {
     return (
-      <div className={styles.container}>
-        <div className={styles.error}>
-          <h2>Error</h2>
-          <p>{error}</p>
-          <Link href="/merchants" className={styles.backButton}>
-            Back to Merchants
-          </Link>
+      <div className="min-h-screen bg-background">
+        <AdminHeader />
+        <div className="max-w-2xl mx-auto px-4 md:px-8 py-16 text-center">
+          <div className="bg-destructive/10 text-destructive rounded-lg p-8">
+            <h2 className="text-xl font-medium mb-2">Error</h2>
+            <p className="mb-4">{error}</p>
+            <Button asChild variant="outline">
+              <Link href="/merchants">Back to Merchants</Link>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -170,177 +177,201 @@ export default function EditMerchantPage() {
   };
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <Link href="/merchants" className={styles.backLink}>
-          ← Back to Merchants
-        </Link>
-        <h1>Edit {merchantName}</h1>
-        <p className={styles.slug}>/{merchantSlug}</p>
-      </header>
+    <div className="min-h-screen bg-background">
+      <AdminHeader />
 
-      <div className={styles.layout}>
-        <div className={styles.form}>
-          {/* Merchant Details */}
-          <section className={styles.section}>
-            <h2>Merchant Details</h2>
-            <div className={styles.field}>
-              <label htmlFor="merchant-name">Merchant Name</label>
-              <input
-                id="merchant-name"
-                type="text"
-                value={merchantName}
-                onChange={(e) => setMerchantName(e.target.value)}
-                placeholder="e.g., Coffee House"
-                className={styles.input}
-              />
-            </div>
-
-            <div className={styles.field}>
-              <label>Slug</label>
-              <input
-                type="text"
-                value={merchantSlug}
-                disabled
-                className={styles.input + ' ' + styles.disabled}
-              />
-              <small>Slug cannot be changed after creation</small>
-            </div>
-
-            <div className={styles.field}>
-              <label htmlFor="reward-goal">Stamps Required for Reward</label>
-              <input
-                id="reward-goal"
-                type="number"
-                min={3}
-                max={15}
-                value={rewardGoal}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value, 10);
-                  setRewardGoal(val);
-                  updateStamp({ total: val });
-                }}
-                className={styles.input}
-              />
-            </div>
-          </section>
-
-          {/* Logo Upload */}
-          <section className={styles.section}>
-            <h2>Stamp Logo</h2>
-            <p className={styles.fieldHint}>
-              This logo is used for stamp shapes and wallet pass icons.
-            </p>
-            <LogoUpload
-              currentUrl={branding.logoUrl}
-              onUpload={(url, data) => {
-                updateBranding({ logoUrl: url });
-                if (data) {
-                  setLogoData(data);
-                }
-              }}
-            />
-          </section>
-
-          {/* Header Logo Upload (Optional) */}
-          <section className={styles.section}>
-            <h2>Header Logo (Optional)</h2>
-            <p className={styles.fieldHint}>
-              Displayed at the top left of the stamp card. If not provided, the merchant name will be shown instead.
-            </p>
-            <LogoUpload
-              currentUrl={branding.headerLogoUrl || ''}
-              onUpload={(url, data) => {
-                updateBranding({ headerLogoUrl: url || undefined });
-                if (data) {
-                  setHeaderLogoData(data);
-                }
-              }}
-            />
-          </section>
-
-          {/* Colors */}
-          <section className={styles.section}>
-            <h2>Colors</h2>
-
-            <ColorPicker
-              label="Primary Color (Background)"
-              value={branding.primaryColor}
-              onChange={(color) => {
-                updateBranding({ primaryColor: color });
-                updateBackground({ color });
-              }}
-            />
-
-            <ColorPicker
-              label="Secondary Color"
-              value={branding.secondaryColor}
-              onChange={(color) => updateBranding({ secondaryColor: color })}
-            />
-
-            <ColorPicker
-              label="Label Color (Text)"
-              value={branding.labelColor}
-              onChange={(color) => updateBranding({ labelColor: color })}
-              contrastCheck={{
-                against: branding.background.color,
-                status: labelContrast
-              }}
-            />
-          </section>
-
-          {/* Stamp Configuration */}
-          <section className={styles.section}>
-            <h2>Stamp Settings</h2>
-            <StampConfig
-              stamp={branding.stamp}
-              backgroundColor={branding.background.color}
-              onChange={updateStamp}
-            />
-          </section>
-
-          {/* Actions */}
-          <section className={styles.actions}>
-            {error && <div className={styles.errorMessage}>{error}</div>}
-            {success && <div className={styles.successMessage}>{success}</div>}
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className={styles.saveButton}
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </button>
-          </section>
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-8">
+        <div className="mb-8">
+          <Link
+            href="/merchants"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back to Merchants
+          </Link>
+          <h1 className="text-3xl font-medium mb-1">Edit {merchantName}</h1>
+          <p className="text-muted-foreground">/{merchantSlug}</p>
         </div>
 
-        {/* Live Preview */}
-        <div className={styles.preview}>
-          <div className={styles.previewHeader}>
-            <h3>Live Preview</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Form */}
+          <div className="space-y-8">
+            {/* Merchant Details */}
+            <section className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-lg font-medium mb-4">Merchant Details</h2>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="merchant-name" className="block text-sm font-medium mb-1.5">
+                    Merchant Name
+                  </label>
+                  <input
+                    id="merchant-name"
+                    type="text"
+                    value={merchantName}
+                    onChange={(e) => setMerchantName(e.target.value)}
+                    placeholder="e.g., Coffee House"
+                    className="w-full px-3 py-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Slug</label>
+                  <input
+                    type="text"
+                    value={merchantSlug}
+                    disabled
+                    className="w-full px-3 py-2 bg-muted border border-input rounded-md text-sm text-muted-foreground cursor-not-allowed"
+                  />
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    Slug cannot be changed after creation
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="reward-goal" className="block text-sm font-medium mb-1.5">
+                    Stamps Required for Reward
+                  </label>
+                  <input
+                    id="reward-goal"
+                    type="number"
+                    min={3}
+                    max={15}
+                    value={rewardGoal}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      setRewardGoal(val);
+                      updateStamp({ total: val });
+                    }}
+                    className="w-full px-3 py-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* Logo Upload */}
+            <section className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-lg font-medium mb-2">Stamp Logo</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                This logo is used for stamp shapes and wallet pass icons.
+              </p>
+              <LogoUpload
+                currentUrl={branding.logoUrl}
+                onUpload={(url, data) => {
+                  updateBranding({ logoUrl: url });
+                  if (data) {
+                    setLogoData(data);
+                  }
+                }}
+              />
+            </section>
+
+            {/* Header Logo Upload */}
+            <section className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-lg font-medium mb-2">Header Logo (Optional)</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Displayed at the top left of the stamp card. If not provided, the merchant name will be shown.
+              </p>
+              <LogoUpload
+                currentUrl={branding.headerLogoUrl || ''}
+                onUpload={(url, data) => {
+                  updateBranding({ headerLogoUrl: url || undefined });
+                  if (data) {
+                    setHeaderLogoData(data);
+                  }
+                }}
+              />
+            </section>
+
+            {/* Colors */}
+            <section className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-lg font-medium mb-4">Colors</h2>
+              <div className="space-y-4">
+                <ColorPicker
+                  label="Primary Color (Background)"
+                  value={branding.primaryColor}
+                  onChange={(color) => {
+                    updateBranding({ primaryColor: color });
+                    updateBackground({ color });
+                  }}
+                />
+                <ColorPicker
+                  label="Secondary Color"
+                  value={branding.secondaryColor}
+                  onChange={(color) => updateBranding({ secondaryColor: color })}
+                />
+                <ColorPicker
+                  label="Label Color (Text)"
+                  value={branding.labelColor}
+                  onChange={(color) => updateBranding({ labelColor: color })}
+                  contrastCheck={{
+                    against: branding.background.color,
+                    status: labelContrast
+                  }}
+                />
+              </div>
+            </section>
+
+            {/* Stamp Configuration */}
+            <section className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-lg font-medium mb-4">Stamp Settings</h2>
+              <StampConfig
+                stamp={branding.stamp}
+                backgroundColor={branding.background.color}
+                onChange={updateStamp}
+              />
+            </section>
+
+            {/* Actions */}
+            <div className="space-y-4">
+              {error && (
+                <div className="bg-destructive/10 text-destructive text-sm rounded-md p-3">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="bg-primary/10 text-primary text-sm rounded-md p-3">
+                  {success}
+                </div>
+              )}
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="w-full h-12 text-base font-medium"
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
           </div>
-          <div className={styles.previewCard}>
-            <StampCardDisplay
-              merchantName={merchantName || 'Your Cafe'}
-              memberName="Jane Doe"
-              stampCount={previewStampCount}
-              rewardGoal={rewardGoal}
-              rewardAvailable={previewStampCount >= rewardGoal}
-              branding={branding}
-              rewardMessage={`Buy ${rewardGoal} coffees, get your next on us.`}
-            />
-          </div>
-          <div className={styles.previewControls}>
-            <label className={styles.controlLabel}>
-              Preview Stamps: {previewStampCount} / {rewardGoal}
-            </label>
-            <input
-              type="range"
-              min={0}
-              max={rewardGoal}
-              value={previewStampCount}
-              onChange={(e) => setPreviewStampCount(parseInt(e.target.value, 10))}
-              className={styles.slider}
-            />
+
+          {/* Live Preview */}
+          <div className="lg:sticky lg:top-24 h-fit">
+            <div className="bg-card border border-border rounded-lg p-6">
+              <h3 className="text-lg font-medium mb-4">Live Preview</h3>
+              <div className="flex justify-center mb-6">
+                <StampCardDisplay
+                  merchantName={merchantName || 'Your Cafe'}
+                  memberName="Jane Doe"
+                  stampCount={previewStampCount}
+                  rewardGoal={rewardGoal}
+                  rewardAvailable={previewStampCount >= rewardGoal}
+                  branding={branding}
+                  rewardMessage={`Buy ${rewardGoal} coffees, get your next on us.`}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Preview Stamps: {previewStampCount} / {rewardGoal}
+                </label>
+                <input
+                  type="range"
+                  min={0}
+                  max={rewardGoal}
+                  value={previewStampCount}
+                  onChange={(e) => setPreviewStampCount(parseInt(e.target.value, 10))}
+                  className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
