@@ -1,35 +1,30 @@
 # Build stage
 FROM node:20-slim AS base
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@9 --activate
 
 FROM base AS builder
 WORKDIR /app
 
 # Copy package files for dependency installation
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json .eslintrc.cjs ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY packages/core/package.json packages/core/
 COPY packages/db/package.json packages/db/
 COPY packages/imaging/package.json packages/imaging/
 COPY packages/pass-apple/package.json packages/pass-apple/
 COPY packages/pass-google/package.json packages/pass-google/
-COPY apps/admin/package.json apps/admin/
+COPY apps/api/package.json apps/api/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY packages/ packages/
-COPY apps/admin/ apps/admin/
+COPY apps/api/ apps/api/
 
-# Build packages first, then admin app
+# Build packages first, then API
 RUN pnpm -r --filter './packages/*' build
-
-# Provide dummy env vars for build (real values injected at runtime)
-ENV NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder-anon-key
-ENV SUPABASE_SERVICE_ROLE_KEY=placeholder-service-key
-
-RUN pnpm --filter @tapandstamp/admin build
+RUN pnpm --filter @tapandstamp/api build
 
 # Production stage
 FROM base AS runner
@@ -40,13 +35,12 @@ ENV NODE_ENV=production
 # Copy built artifacts and dependencies
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/apps/admin/.next ./apps/admin/.next
-COPY --from=builder /app/apps/admin/package.json ./apps/admin/
-COPY --from=builder /app/apps/admin/next.config.js ./apps/admin/
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/apps/api/package.json ./apps/api/
 
-WORKDIR /app/apps/admin
+WORKDIR /app/apps/api
 
 EXPOSE 8080
 ENV PORT=8080
 
-CMD ["pnpm", "start"]
+CMD ["node", "dist/index.js"]
