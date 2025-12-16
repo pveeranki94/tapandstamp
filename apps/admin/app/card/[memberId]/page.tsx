@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { StampCardDisplay } from '../../../components/card/StampCardDisplay';
 import { AddToHomeScreen } from '../../../components/card/AddToHomeScreen';
+import { AddToAppleWallet } from '../../../components/card/AddToAppleWallet';
 import type { Branding } from '@tapandstamp/core';
 import styles from './page.module.css';
 import './card.css';
@@ -169,6 +170,8 @@ export default function StampCardPage() {
           onRedeem={handleRedeem}
           isRedeeming={isRedeeming}
         />
+
+        <AddToAppleWallet memberId={memberId} merchantName={merchant.name} />
       </main>
 
       <AddToHomeScreen />

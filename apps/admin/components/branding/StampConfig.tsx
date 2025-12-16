@@ -86,19 +86,6 @@ export function StampConfig({ stamp, backgroundColor, onChange }: StampConfigPro
         value={stamp.outlineColor}
         onChange={(color) => onChange({ outlineColor: color })}
       />
-
-      {/* Overlay Logo Toggle */}
-      <div className={styles.field}>
-        <label className={styles.checkboxLabel}>
-          <input
-            type="checkbox"
-            checked={stamp.overlayLogo}
-            onChange={(e) => onChange({ overlayLogo: e.target.checked })}
-            className={styles.checkbox}
-          />
-          Overlay logo on stamps (future feature)
-        </label>
-      </div>
     </div>
   );
 }

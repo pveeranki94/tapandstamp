@@ -18,11 +18,11 @@ export interface RenderStampStripResult {
 
 /**
  * Platform-specific dimensions for stamp strips
- * Apple: 1125×432 (@2x for retina)
+ * Apple: 1125×537 (@3x for retina, taller for larger stamps)
  * Google: 1032×336 (@2x)
  */
 const DIMENSIONS = {
-  apple: { width: 1125, height: 432 },
+  apple: { width: 1125, height: 537 },
   google: { width: 1032, height: 336 }
 } as const;
 
@@ -41,17 +41,28 @@ export async function renderStampStrip(
     throw new Error(`count must be between 0 and ${stamp.total}`);
   }
 
-  // Calculate stamp layout
-  const padding = 40;
-  const textHeight = 80;
-  const stampAreaHeight = height - textHeight - padding * 2;
-  const stampSize = Math.min(
-    (width - padding * 2) / stamp.total - 20,
-    stampAreaHeight
-  );
-  const totalStampsWidth = stamp.total * stampSize + (stamp.total - 1) * 20;
-  const startX = (width - totalStampsWidth) / 2;
-  const stampY = padding;
+  // Calculate stamp layout - maximize stamp size with minimal gaps
+  const spacingX = 4;
+  const spacingY = 4;
+
+  // Use 2 rows for 6 stamps (3 per row), single row otherwise
+  const cols = stamp.total <= 6 ? Math.ceil(stamp.total / 2) : stamp.total;
+  const rows = stamp.total <= 6 ? 2 : 1;
+
+  // Use full dimensions - no padding
+  const availableWidth = width;
+  const availableHeight = height;
+
+  // Calculate stamp size to fit grid - maximize size
+  const maxStampWidth = (availableWidth - spacingX * (cols - 1)) / cols;
+  const maxStampHeight = (availableHeight - spacingY * (rows - 1)) / rows;
+  const stampSize = Math.min(maxStampWidth, maxStampHeight);
+
+  // Center the grid both horizontally and vertically
+  const gridWidth = cols * stampSize + (cols - 1) * spacingX;
+  const gridHeight = rows * stampSize + (rows - 1) * spacingY;
+  const startX = (width - gridWidth) / 2;
+  const stampY = (height - gridHeight) / 2;
 
   // For logo shape, we need to composite the logo images
   if (stamp.shape === 'logo' && logoBuffer) {
@@ -60,10 +71,13 @@ export async function renderStampStrip(
       height,
       count,
       total: stamp.total,
+      cols,
+      rows,
       startX,
       startY: stampY,
       size: stampSize,
-      spacing: 20,
+      spacingX,
+      spacingY,
       backgroundColor: background.color,
       labelColor,
       logoBuffer
@@ -74,36 +88,24 @@ export async function renderStampStrip(
   const stamps = generateStampsSVG({
     count,
     total: stamp.total,
+    cols,
+    rows,
     startX,
     startY: stampY,
     size: stampSize,
-    spacing: 20,
+    spacingX,
+    spacingY,
     shape: stamp.shape === 'logo' ? 'circle' : stamp.shape, // Fallback for logo without buffer
     filledColor: stamp.filledColor,
     emptyColor: stamp.emptyColor,
     outlineColor: stamp.outlineColor
   });
 
-  // Create text SVG
-  const text = `
-    <text
-      x="${width / 2}"
-      y="${height - padding - 20}"
-      font-family="Helvetica, Arial, sans-serif"
-      font-size="64"
-      font-weight="bold"
-      fill="${labelColor}"
-      text-anchor="middle"
-      dominant-baseline="middle"
-    >${count} / ${stamp.total}</text>
-  `;
-
-  // Build complete SVG
+  // Build complete SVG - no text, just stamps for maximum size
   const svg = `
     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
       <rect width="${width}" height="${height}" fill="${background.color}"/>
       ${stamps}
-      ${text}
     </svg>
   `;
 
@@ -125,10 +127,13 @@ interface LogoStampStripOptions {
   height: number;
   count: number;
   total: number;
+  cols: number;
+  rows: number;
   startX: number;
   startY: number;
   size: number;
-  spacing: number;
+  spacingX: number;
+  spacingY: number;
   backgroundColor: string;
   labelColor: string;
   logoBuffer: Buffer;
@@ -146,36 +151,27 @@ async function renderLogoStampStrip(
     height,
     count,
     total,
+    cols,
+    rows,
     startX,
     startY,
     size,
-    spacing,
+    spacingX,
+    spacingY,
     backgroundColor,
     labelColor,
     logoBuffer
   } = options;
 
-  const padding = 40;
-
-  // Create base image with background
+  // Create base image with background - no text for maximum stamp size
   const baseSvg = `
     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
       <rect width="${width}" height="${height}" fill="${backgroundColor}"/>
-      <text
-        x="${width / 2}"
-        y="${height - padding - 20}"
-        font-family="Helvetica, Arial, sans-serif"
-        font-size="64"
-        font-weight="bold"
-        fill="${labelColor}"
-        text-anchor="middle"
-        dominant-baseline="middle"
-      >${count} / ${total}</text>
     </svg>
   `;
 
-  // Prepare logo in different states
-  const logoSize = Math.round(size * 0.9); // Slightly smaller than slot
+  // Prepare logo in different states - use full slot size
+  const logoSize = size; // Full slot size for maximum visibility
 
   // Resize logo to stamp size (SVG is rendered at high density for crisp output)
   const resizedLogo = await sharp(logoBuffer, { density: 300 })
@@ -198,13 +194,15 @@ async function renderLogoStampStrip(
     .png()
     .toBuffer();
 
-  // Build composite operations for each stamp
+  // Build composite operations for each stamp in grid layout
   const composites: sharp.OverlayOptions[] = [];
   const logoOffset = (size - logoSize) / 2; // Center logo in stamp slot
 
   for (let i = 0; i < total; i++) {
-    const x = Math.round(startX + i * (size + spacing) + logoOffset);
-    const y = Math.round(startY + logoOffset);
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const x = Math.round(startX + col * (size + spacingX) + logoOffset);
+    const y = Math.round(startY + row * (size + spacingY) + logoOffset);
     const isFilled = i < count;
 
     composites.push({
@@ -231,10 +229,13 @@ async function renderLogoStampStrip(
 interface StampSVGOptions {
   count: number;
   total: number;
+  cols: number;
+  rows: number;
   startX: number;
   startY: number;
   size: number;
-  spacing: number;
+  spacingX: number;
+  spacingY: number;
   shape: 'circle' | 'square'; // 'logo' is handled separately via renderLogoStampStrip
   filledColor: string;
   emptyColor: string;
@@ -242,16 +243,18 @@ interface StampSVGOptions {
 }
 
 /**
- * Generates SVG markup for stamp slots
+ * Generates SVG markup for stamp slots in a grid layout
  */
 function generateStampsSVG(options: StampSVGOptions): string {
   const {
     count,
     total,
+    cols,
     startX,
     startY,
     size,
-    spacing,
+    spacingX,
+    spacingY,
     shape,
     filledColor,
     emptyColor,
@@ -262,13 +265,16 @@ function generateStampsSVG(options: StampSVGOptions): string {
   const strokeWidth = 4;
 
   for (let i = 0; i < total; i++) {
-    const x = startX + i * (size + spacing);
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const x = startX + col * (size + spacingX);
+    const y = startY + row * (size + spacingY);
     const isFilled = i < count;
     const fillColor = isFilled ? filledColor : emptyColor;
 
     if (shape === 'circle') {
       const cx = x + size / 2;
-      const cy = startY + size / 2;
+      const cy = y + size / 2;
       const r = size / 2 - strokeWidth;
       stamps.push(`
         <circle
@@ -283,7 +289,7 @@ function generateStampsSVG(options: StampSVGOptions): string {
     } else {
       // square
       const adjustedX = x + strokeWidth / 2;
-      const adjustedY = startY + strokeWidth / 2;
+      const adjustedY = y + strokeWidth / 2;
       const adjustedSize = size - strokeWidth;
       const cornerRadius = 8;
       stamps.push(`

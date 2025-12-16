@@ -5,7 +5,7 @@ import { updateSession } from './lib/supabase/middleware';
 const PUBLIC_ROUTES = ['/', '/login', '/auth/callback'];
 
 // Routes that are public for customer-facing flows
-const CUSTOMER_ROUTES = ['/join', '/card'];
+const CUSTOMER_ROUTES = ['/join', '/card', '/api/passes', '/api/passkit'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
