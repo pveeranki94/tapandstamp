@@ -24,9 +24,12 @@ COPY apps/admin/ apps/admin/
 # Build packages first, then admin app
 RUN pnpm -r --filter './packages/*' build
 
-# Provide dummy env vars for build (real values injected at runtime)
-ENV NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder-anon-key
+# Build args for environment-specific Supabase URLs (baked into Next.js client)
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+# Dummy service key for build (real value comes at runtime from secrets)
 ENV SUPABASE_SERVICE_ROLE_KEY=placeholder-service-key
 
 RUN pnpm --filter @tapandstamp/admin build
@@ -37,12 +40,28 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy built artifacts and dependencies
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/apps/admin/.next ./apps/admin/.next
+# Copy workspace config and package files
+COPY --from=builder /app/pnpm-lock.yaml /app/pnpm-workspace.yaml /app/package.json ./
+COPY --from=builder /app/packages/core/package.json ./packages/core/
+COPY --from=builder /app/packages/db/package.json ./packages/db/
+COPY --from=builder /app/packages/imaging/package.json ./packages/imaging/
+COPY --from=builder /app/packages/pass-apple/package.json ./packages/pass-apple/
+COPY --from=builder /app/packages/pass-google/package.json ./packages/pass-google/
 COPY --from=builder /app/apps/admin/package.json ./apps/admin/
+
+# Copy built packages
+COPY --from=builder /app/packages/core/dist ./packages/core/dist
+COPY --from=builder /app/packages/db/dist ./packages/db/dist
+COPY --from=builder /app/packages/imaging/dist ./packages/imaging/dist
+COPY --from=builder /app/packages/pass-apple/dist ./packages/pass-apple/dist
+COPY --from=builder /app/packages/pass-google/dist ./packages/pass-google/dist
+
+# Copy Next.js build artifacts
+COPY --from=builder /app/apps/admin/.next ./apps/admin/.next
 COPY --from=builder /app/apps/admin/next.config.js ./apps/admin/
+
+# Install production dependencies only
+RUN pnpm install --frozen-lockfile --prod
 
 WORKDIR /app/apps/admin
 

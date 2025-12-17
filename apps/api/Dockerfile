@@ -32,11 +32,19 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy built artifacts and dependencies
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
+# Copy workspace config and package files
+COPY --from=builder /app/pnpm-lock.yaml /app/pnpm-workspace.yaml /app/package.json ./
+COPY --from=builder /app/packages/core/package.json ./packages/core/
+COPY --from=builder /app/packages/db/package.json ./packages/db/
 COPY --from=builder /app/apps/api/package.json ./apps/api/
+
+# Copy built packages and API
+COPY --from=builder /app/packages/core/dist ./packages/core/dist
+COPY --from=builder /app/packages/db/dist ./packages/db/dist
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+
+# Install production dependencies only
+RUN pnpm install --frozen-lockfile --prod
 
 WORKDIR /app/apps/api
 

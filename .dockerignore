@@ -1,0 +1,50 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs (will be built in container)
+**/dist
+**/.next
+**/out
+
+# Development files
+**/*.log
+**/.env
+**/.env.*
+!**/.env.example
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Tests
+**/__tests__
+**/*.test.ts
+**/*.spec.ts
+**/coverage
+**/jest.config.*
+
+# Docs
+*.md
+!README.md
+docs/
+
+# Certificates (should be mounted as secrets)
+certs/
+
+# CI/CD
+.github/
+
+# Misc
+.claude/
+assets/
