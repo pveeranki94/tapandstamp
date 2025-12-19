@@ -38,6 +38,9 @@ RUN pnpm --filter @tapandstamp/admin build
 FROM base AS runner
 WORKDIR /app
 
+# Install openssl for PassKit certificate handling and fonts for stamp rendering
+RUN apt-get update && apt-get install -y openssl fontconfig fonts-dejavu-core && rm -rf /var/lib/apt/lists/*
+
 ENV NODE_ENV=production
 
 # Copy workspace config and package files

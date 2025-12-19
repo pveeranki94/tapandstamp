@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { createClient } from '../../../lib/supabase/server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 function getOrigin(request: NextRequest): string {
   // In Cloud Run, request.url contains the internal container URL (localhost:8080)
@@ -26,13 +26,43 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get('next') ?? '/dashboard';
   const origin = getOrigin(request);
 
-  if (code) {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+  console.log('[auth/callback] Starting code exchange');
+  console.log('[auth/callback] Origin:', origin);
+  console.log('[auth/callback] Code present:', !!code);
+  console.log('[auth/callback] Cookies:', request.cookies.getAll().map(c => c.name));
 
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+  if (code) {
+    // Create redirect response first - cookies will be set on this response
+    const redirectUrl = `${origin}${next}`;
+    const response = NextResponse.redirect(redirectUrl);
+
+    // Create Supabase client that reads from request and writes to response
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options);
+            });
+          },
+        },
+      }
+    );
+
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      console.error('[auth/callback] Exchange error:', error.message, error.status);
+      return NextResponse.redirect(`${origin}/login?error=auth_failed`);
     }
+
+    console.log('[auth/callback] Exchange successful, user:', data.user?.email);
+    return response;
   }
 
   // Return to login with error
