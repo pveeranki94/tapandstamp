@@ -63,7 +63,7 @@ export async function generateJoinQR(
   merchantSlug: string,
   options?: QRCodeOptions
 ): Promise<string> {
-  const url = `${baseUrl}/add/${merchantSlug}`;
+  const url = `${baseUrl}/join/${merchantSlug}`;
   return generateQRCode(url, options);
 }
 
