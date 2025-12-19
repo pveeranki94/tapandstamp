@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { AdminHeader } from '../../components/admin/AdminHeader';
 import { Button } from '../../components/ui/button';
-import { Users, Stamp, TrendingUp, Gift, Apple, Smartphone, Globe } from 'lucide-react';
+import { Users, Stamp, TrendingUp, Gift, Apple, Smartphone, Globe, ArrowLeft } from 'lucide-react';
 import type { GlobalAnalytics, TopInsights } from '../../lib/db/analytics';
 
 interface MerchantOption {
@@ -102,6 +102,13 @@ export default function AnalyticsPage() {
       <AdminHeader />
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-8">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Dashboard
+        </Link>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>

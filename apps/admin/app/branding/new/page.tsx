@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import type { Branding } from '@tapandstamp/core';
 import { LogoUpload, type LogoData } from '../../../components/branding/LogoUpload';
 import { ColorPicker } from '../../../components/branding/ColorPicker';
@@ -9,6 +10,7 @@ import { StampCardDisplay } from '../../../components/card/StampCardDisplay';
 import { getContrastStatus } from '../../../lib/color-utils';
 import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { Button } from '../../../components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import '../../../app/card/[memberId]/card.css';
 
 export default function NewBrandingPage() {
@@ -133,6 +135,13 @@ export default function NewBrandingPage() {
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-8">
         <div className="mb-8">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back to Dashboard
+          </Link>
           <h1 className="text-3xl font-medium mb-2">Create Loyalty Card</h1>
           <p className="text-muted-foreground">Set up your branded loyalty card for Apple and Google Wallet</p>
         </div>

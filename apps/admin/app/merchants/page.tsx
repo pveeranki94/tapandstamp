@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { AdminHeader } from '../../components/admin/AdminHeader';
 import { Button } from '../../components/ui/button';
-import { Plus, ChevronRight } from 'lucide-react';
+import { Plus, ChevronRight, ArrowLeft } from 'lucide-react';
 
 interface MerchantSummary {
   id: string;
@@ -77,6 +77,13 @@ export default function MerchantsPage() {
       <AdminHeader />
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-8">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Dashboard
+        </Link>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-medium mb-2">Merchants</h1>

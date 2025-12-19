@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Store, BarChart3, Palette } from 'lucide-react';
+import { Store, BarChart3, Palette, ArrowLeft } from 'lucide-react';
 import { AdminHeader } from '../../components/admin/AdminHeader';
 
 export default function DashboardPage() {
@@ -11,6 +11,13 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
+        <Link
+          href="/"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Home
+        </Link>
         <div className="mb-10">
           <h2 className="text-3xl md:text-4xl font-medium mb-2">Dashboard</h2>
           <p className="text-muted-foreground">Manage your loyalty cards and view customer insights</p>

@@ -9,9 +9,10 @@ import { ColorPicker } from '../../../components/branding/ColorPicker';
 import { StampConfig } from '../../../components/branding/StampConfig';
 import { StampCardDisplay } from '../../../components/card/StampCardDisplay';
 import { getContrastStatus } from '../../../lib/color-utils';
+import { generateJoinQR } from '../../../lib/qrcode';
 import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { Button } from '../../../components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download, QrCode } from 'lucide-react';
 import '../../card/[memberId]/card.css';
 
 interface MerchantData {
@@ -42,6 +43,7 @@ export default function EditMerchantPage() {
   const [headerLogoData, setHeaderLogoData] = useState<LogoData | null>(null);
   const [branding, setBranding] = useState<Branding | null>(null);
   const [previewStampCount, setPreviewStampCount] = useState(3);
+  const [joinQR, setJoinQR] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchMerchant() {
@@ -69,6 +71,23 @@ export default function EditMerchantPage() {
 
     fetchMerchant();
   }, [merchantId]);
+
+  // Generate QR code when merchantSlug is available
+  useEffect(() => {
+    if (!merchantSlug) return;
+
+    const generateQR = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+        const qr = await generateJoinQR(baseUrl, merchantSlug);
+        setJoinQR(qr);
+      } catch (err) {
+        console.error('Failed to generate QR code:', err);
+      }
+    };
+
+    generateQR();
+  }, [merchantSlug]);
 
   if (loading) {
     return (
@@ -183,11 +202,11 @@ export default function EditMerchantPage() {
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-8">
         <div className="mb-8">
           <Link
-            href="/merchants"
+            href="/dashboard"
             className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
-            Back to Merchants
+            Back to Dashboard
           </Link>
           <h1 className="text-3xl font-medium mb-1">Edit {merchantName}</h1>
           <p className="text-muted-foreground">/{merchantSlug}</p>
@@ -319,6 +338,51 @@ export default function EditMerchantPage() {
                 backgroundColor={branding.background.color}
                 onChange={updateStamp}
               />
+            </section>
+
+            {/* QR Codes */}
+            <section className="bg-card border border-border rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <QrCode className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-medium">QR Codes</h2>
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">
+                Download QR codes to print and display at your location.
+              </p>
+
+              <div className="space-y-4">
+                {/* Join QR */}
+                <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
+                  {joinQR ? (
+                    <img
+                      src={joinQR}
+                      alt="Join QR Code"
+                      className="w-24 h-24 rounded-lg border border-border bg-white"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 rounded-lg border border-border bg-muted flex items-center justify-center">
+                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium mb-1">Join QR Code</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Customers scan this to add your loyalty card to their wallet.
+                    </p>
+                    <p className="text-xs text-muted-foreground font-mono mb-3 truncate">
+                      {process.env.NEXT_PUBLIC_BASE_URL || window.location.origin}/add/{merchantSlug}
+                    </p>
+                    {joinQR && (
+                      <Button asChild variant="outline" size="sm">
+                        <a href={joinQR} download={`${merchantSlug}-join-qr.png`}>
+                          <Download className="w-4 h-4 mr-2" />
+                          Download QR
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </section>
 
             {/* Actions */}
