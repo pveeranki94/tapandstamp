@@ -370,7 +370,7 @@ export default function EditMerchantPage() {
                       Customers scan this to add your loyalty card to their wallet.
                     </p>
                     <p className="text-xs text-muted-foreground font-mono mb-3 truncate">
-                      {process.env.NEXT_PUBLIC_BASE_URL || window.location.origin}/add/{merchantSlug}
+                      {process.env.NEXT_PUBLIC_BASE_URL || window.location.origin}/join/{merchantSlug}
                     </p>
                     {joinQR && (
                       <Button asChild variant="outline" size="sm">

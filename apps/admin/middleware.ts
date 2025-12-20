@@ -7,6 +7,11 @@ const PUBLIC_ROUTES = ['/', '/login', '/auth/callback'];
 // Routes that are public for customer-facing flows
 const CUSTOMER_ROUTES = ['/join', '/card', '/api/passes', '/api/passkit'];
 
+// API routes that are public (for customer join flow)
+const PUBLIC_API_PATTERNS = [
+  /^\/api\/merchants\/[^/]+$/, // /api/merchants/[slug] but not /api/merchants/id/[id]
+];
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -17,6 +22,11 @@ export async function middleware(request: NextRequest) {
 
   // Allow customer-facing routes
   if (CUSTOMER_ROUTES.some((route) => pathname.startsWith(route))) {
+    return NextResponse.next();
+  }
+
+  // Allow public API patterns (e.g., /api/merchants/[slug] for join flow)
+  if (PUBLIC_API_PATTERNS.some((pattern) => pattern.test(pathname))) {
     return NextResponse.next();
   }
 
