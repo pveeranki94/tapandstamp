@@ -2,9 +2,26 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import type { CtaLink, NavLink } from '../../lib/contentful-types';
 
-export function Navbar() {
+interface NavbarProps {
+  content?: {
+    links: NavLink[];
+    ctaButton: CtaLink;
+  };
+}
+
+const defaultLinks: NavLink[] = [
+  { label: 'HOW IT WORKS', url: '/#how-it-works' },
+];
+
+const defaultCta: CtaLink = { label: 'GET STARTED', url: '/login' };
+
+export function Navbar({ content }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const links = content?.links ?? defaultLinks;
+  const cta = content?.ctaButton ?? defaultCta;
 
   return (
     <>
@@ -18,25 +35,27 @@ export function Navbar() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center">
+          {links.map((link) => (
+            <Link
+              key={link.url}
+              href={link.url}
+              className="relative overflow-hidden bg-background text-foreground h-[34px] px-3 flex items-center text-[11px] font-medium uppercase border border-foreground leading-none group"
+            >
+              <span className="relative z-10">{link.label}</span>
+              <span className="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></span>
+            </Link>
+          ))}
           <Link
-            href="/#how-it-works"
-            className="relative overflow-hidden bg-background text-foreground h-[34px] px-3 flex items-center text-[11px] font-medium uppercase border border-foreground leading-none group"
-          >
-            <span className="relative z-10">HOW IT WORKS</span>
-            <span className="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></span>
-          </Link>
-          <Link
-            href="/login"
+            href={cta.url}
             className="relative overflow-hidden bg-foreground text-background h-[34px] px-3 flex items-center text-[11px] font-medium uppercase border-l-0 border border-foreground leading-none group"
           >
-            <span className="relative z-10">GET STARTED</span>
+            <span className="relative z-10">{cta.label}</span>
           </Link>
         </div>
 
         {/* Mobile Navigation - Full Screen */}
         {isMobileMenuOpen && (
           <div className="md:hidden fixed inset-0 z-[3000] flex flex-col">
-            {/* Close header */}
             <div className="bg-foreground flex items-center justify-center py-16">
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -45,24 +64,25 @@ export function Navbar() {
                 CLOSE
               </button>
             </div>
-
-            {/* Menu items */}
             <div className="flex-1 flex flex-col bg-background">
+              {links.map((link, i) => (
+                <Link
+                  key={link.url}
+                  href={link.url}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex-1 flex items-center justify-center text-foreground text-[17px] font-medium uppercase border-b border-foreground tracking-[-0.34px] animate-fade-in"
+                  style={{ animationDelay: `${0.1 * (i + 1)}s`, animationFillMode: 'both' }}
+                >
+                  {link.label}
+                </Link>
+              ))}
               <Link
-                href="/#how-it-works"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex-1 flex items-center justify-center text-foreground text-[17px] font-medium uppercase border-b border-foreground tracking-[-0.34px] animate-fade-in"
-                style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
-              >
-                HOW IT WORKS
-              </Link>
-              <Link
-                href="/login"
+                href={cta.url}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex-1 flex items-center justify-center bg-foreground text-background text-[17px] font-medium uppercase tracking-[-0.34px] animate-fade-in"
-                style={{ animationDelay: '0.2s', animationFillMode: 'both' }}
+                style={{ animationDelay: `${0.1 * (links.length + 1)}s`, animationFillMode: 'both' }}
               >
-                GET STARTED
+                {cta.label}
               </Link>
             </div>
           </div>

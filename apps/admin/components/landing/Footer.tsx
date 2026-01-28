@@ -1,7 +1,24 @@
 import React from 'react';
 import Link from 'next/link';
+import type { NavLink } from '../../lib/contentful-types';
 
-export function Footer() {
+interface FooterProps {
+  content?: {
+    tagline: string;
+    links: NavLink[];
+  };
+}
+
+const defaultLinks: NavLink[] = [
+  { label: 'How it works', url: '/#how-it-works' },
+  { label: 'Sign in', url: '/login' },
+  { label: 'Get started', url: '/login?mode=signup' },
+];
+
+export function Footer({ content }: FooterProps) {
+  const tagline = content?.tagline ?? 'Turn first-time guests into regulars.';
+  const links = content?.links ?? defaultLinks;
+
   return (
     <footer className="border-t border-border py-12 md:py-16 px-4 md:px-8">
       <div className="max-w-6xl mx-auto">
@@ -17,21 +34,17 @@ export function Footer() {
               <span className="text-lg font-medium">Tap & Stamp</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Turn first-time guests into regulars.
+              {tagline}
             </p>
           </div>
 
           {/* Links */}
           <nav className="flex flex-wrap gap-6 md:gap-8 text-sm">
-            <Link href="/#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-              How it works
-            </Link>
-            <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
-              Sign in
-            </Link>
-            <Link href="/login?mode=signup" className="text-muted-foreground hover:text-foreground transition-colors">
-              Get started
-            </Link>
+            {links.map((link) => (
+              <Link key={link.url} href={link.url} className="text-muted-foreground hover:text-foreground transition-colors">
+                {link.label}
+              </Link>
+            ))}
           </nav>
         </div>
 

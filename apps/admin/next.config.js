@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.ctfassets.net',
+      },
+    ],
+  },
   experimental: {
     // Externalize packages with native binaries that can't be bundled by webpack
     serverComponentsExternalPackages: ['sharp', '@tapandstamp/imaging']

@@ -4,12 +4,27 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
+import type { CtaLink } from '../../lib/contentful-types';
 
-export function HeroSection() {
+interface HeroSectionProps {
+  content?: {
+    subheading: string;
+    primaryCta: CtaLink;
+    secondaryCta: CtaLink;
+    socialProofVenues: string[];
+  };
+}
+
+export function HeroSection({ content }: HeroSectionProps) {
+  const subheading = content?.subheading ?? 'Simple digital loyalty for cafes, bars, and restaurants — no app download required for your customers.';
+  const primaryCta = content?.primaryCta ?? { label: 'Start free', url: '/login?mode=signup' };
+  const secondaryCta = content?.secondaryCta ?? { label: 'See how it works', url: '#how-it-works' };
+  const venues = content?.socialProofVenues ?? ['The Corner Cafe', 'Bar Centrale', 'Little Elm', 'Brew & Co'];
+
   return (
     <section className="pt-32 md:pt-40 lg:pt-48 pb-16 md:pb-24 lg:pb-32 px-4 md:px-8">
       <div className="max-w-5xl mx-auto">
-        {/* Main headline */}
+        {/* Main headline - always use styled version (rich text can't capture this styling) */}
         <div className="text-center mb-8 md:mb-12">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight mb-6 md:mb-8">
             <span className="inline-flex flex-wrap justify-center items-center gap-2 md:gap-3">
@@ -35,7 +50,7 @@ export function HeroSection() {
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.7s', animationFillMode: 'both' }}>
-            Simple digital loyalty for cafes, bars, and restaurants — no app download required for your customers.
+            {subheading}
           </p>
         </div>
 
@@ -46,9 +61,9 @@ export function HeroSection() {
             asChild
             className="group relative overflow-hidden bg-foreground text-background hover:bg-foreground/90 px-8 py-6 text-base font-medium"
           >
-            <Link href="/login?mode=signup">
+            <Link href={primaryCta.url}>
               <span className="relative z-10 flex items-center gap-2">
-                Start free
+                {primaryCta.label}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
@@ -58,11 +73,15 @@ export function HeroSection() {
             variant="outline"
             size="lg"
             onClick={() => {
-              document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+              if (secondaryCta.url.startsWith('#')) {
+                document.getElementById(secondaryCta.url.slice(1))?.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                window.location.href = secondaryCta.url;
+              }
             }}
             className="px-8 py-6 text-base font-medium border-foreground/20 hover:bg-muted"
           >
-            See how it works
+            {secondaryCta.label}
           </Button>
         </div>
 
@@ -70,10 +89,9 @@ export function HeroSection() {
         <div className="mt-16 md:mt-24 text-center animate-fade-in" style={{ animationDelay: '0.9s', animationFillMode: 'both' }}>
           <p className="text-sm text-muted-foreground mb-4">Trusted by local venues</p>
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-60">
-            <span className="text-lg font-medium">The Corner Cafe</span>
-            <span className="text-lg font-medium">Bar Centrale</span>
-            <span className="text-lg font-medium">Little Elm</span>
-            <span className="text-lg font-medium">Brew & Co</span>
+            {venues.map((venue) => (
+              <span key={venue} className="text-lg font-medium">{venue}</span>
+            ))}
           </div>
         </div>
       </div>

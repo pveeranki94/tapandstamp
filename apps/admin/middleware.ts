@@ -5,7 +5,7 @@ import { updateSession } from './lib/supabase/middleware';
 const PUBLIC_ROUTES = ['/', '/login', '/auth/callback'];
 
 // Routes that are public for customer-facing flows
-const CUSTOMER_ROUTES = ['/join', '/card', '/api/passes', '/api/passkit'];
+const CUSTOMER_ROUTES = ['/join', '/card', '/api/passes', '/api/passkit', '/api/draft', '/api/revalidate'];
 
 // API routes that are public (for customer join flow)
 const PUBLIC_API_PATTERNS = [
