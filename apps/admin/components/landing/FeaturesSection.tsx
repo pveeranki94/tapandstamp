@@ -1,14 +1,13 @@
 import React from 'react';
 import Image from 'next/image';
 import { Smartphone, Gift, Globe, Coffee } from 'lucide-react';
-import type { Entry } from 'contentful';
-import type { FeatureCardFields } from '../../lib/contentful-types';
+import type { ContentfulEntry, FeatureCardFields } from '../../lib/contentful-types';
 
 interface FeaturesSectionProps {
   content?: {
     headline: string;
     subheadline: string;
-    features: Entry<FeatureCardFields>[];
+    features: ContentfulEntry<FeatureCardFields>[];
   };
 }
 

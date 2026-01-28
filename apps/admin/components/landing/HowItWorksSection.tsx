@@ -1,14 +1,13 @@
 import React from 'react';
 import Image from 'next/image';
 import { QrCode, Stamp, PartyPopper } from 'lucide-react';
-import type { Entry } from 'contentful';
-import type { StepFields } from '../../lib/contentful-types';
+import type { ContentfulEntry, StepFields } from '../../lib/contentful-types';
 
 interface HowItWorksSectionProps {
   content?: {
     sectionTitle: string;
     headline: string;
-    steps: Entry<StepFields>[];
+    steps: ContentfulEntry<StepFields>[];
   };
 }
 

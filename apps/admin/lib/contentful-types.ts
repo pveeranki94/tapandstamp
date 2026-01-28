@@ -1,4 +1,3 @@
-import type { Asset, Entry, EntryFields } from 'contentful';
 import type { Document } from '@contentful/rich-text-types';
 
 export interface CtaLink {
@@ -11,52 +10,70 @@ export interface NavLink {
   url: string;
 }
 
+// Asset type (simplified)
+export interface ContentfulAsset {
+  sys: { id: string };
+  fields: {
+    title?: string;
+    file?: {
+      url: string;
+      contentType: string;
+    };
+  };
+}
+
+// Entry wrapper type
+export interface ContentfulEntry<T> {
+  sys: { id: string };
+  fields: T;
+}
+
 // Content Type: featureCard
 export interface FeatureCardFields {
-  title: EntryFields.Text;
-  description: EntryFields.Text;
-  icon: Asset;
+  title: string;
+  description: string;
+  icon: ContentfulAsset;
 }
 
 // Content Type: step
 export interface StepFields {
-  stepNumber: EntryFields.Text;
-  title: EntryFields.Text;
-  description: EntryFields.Text;
-  icon: Asset;
+  stepNumber: string;
+  title: string;
+  description: string;
+  icon: ContentfulAsset;
 }
 
 // Content Type: navBar
 export interface NavBarFields {
-  logo: Asset;
+  logo: ContentfulAsset;
   links: NavLink[];
   ctaButton: CtaLink;
 }
 
 // Content Type: landingPage (singleton)
 export interface LandingPageFields {
-  title: EntryFields.Text;
+  title: string;
   heroHeadline: Document;
-  heroSubheading: EntryFields.Text;
+  heroSubheading: string;
   heroPrimaryCta: CtaLink;
   heroSecondaryCta: CtaLink;
   socialProofVenues: string[];
-  features: Entry<FeatureCardFields>[];
-  featuresHeadline: EntryFields.Text;
-  featuresSubheadline: EntryFields.Text;
-  howItWorksSteps: Entry<StepFields>[];
-  howItWorksSectionTitle: EntryFields.Text;
-  howItWorksHeadline: EntryFields.Text;
-  ctaHeadline: EntryFields.Text;
-  ctaSubtext: EntryFields.Text;
+  features: ContentfulEntry<FeatureCardFields>[];
+  featuresHeadline: string;
+  featuresSubheadline: string;
+  howItWorksSteps: ContentfulEntry<StepFields>[];
+  howItWorksSectionTitle: string;
+  howItWorksHeadline: string;
+  ctaHeadline: string;
+  ctaSubtext: string;
   ctaPrimaryCta: CtaLink;
-  ctaSecondaryText: EntryFields.Text;
-  ctaSecondaryUrl: EntryFields.Text;
-  footerTagline: EntryFields.Text;
+  ctaSecondaryText: string;
+  ctaSecondaryUrl: string;
+  footerTagline: string;
   footerLinks: NavLink[];
 }
 
-export type LandingPageEntry = Entry<LandingPageFields>;
-export type FeatureCardEntry = Entry<FeatureCardFields>;
-export type StepEntry = Entry<StepFields>;
-export type NavBarEntry = Entry<NavBarFields>;
+export type LandingPageEntry = ContentfulEntry<LandingPageFields>;
+export type FeatureCardEntry = ContentfulEntry<FeatureCardFields>;
+export type StepEntry = ContentfulEntry<StepFields>;
+export type NavBarEntry = ContentfulEntry<NavBarFields>;

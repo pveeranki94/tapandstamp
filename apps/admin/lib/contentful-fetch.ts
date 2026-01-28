@@ -1,5 +1,5 @@
 import { getClient } from './contentful';
-import type { LandingPageFields } from './contentful-types';
+import type { LandingPageEntry } from './contentful-types';
 
 export async function getLandingPageContent(preview: boolean = false) {
   const client = getClient(preview);
@@ -8,7 +8,7 @@ export async function getLandingPageContent(preview: boolean = false) {
     return null;
   }
 
-  const entries = await client.getEntries<LandingPageFields>({
+  const entries = await client.getEntries({
     content_type: 'landingPage',
     include: 2,
     limit: 1,
@@ -18,5 +18,6 @@ export async function getLandingPageContent(preview: boolean = false) {
     return null;
   }
 
-  return entries.items[0];
+  // Cast to our defined type - the shape is known from Contentful
+  return entries.items[0] as unknown as LandingPageEntry;
 }

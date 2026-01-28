@@ -9,13 +9,14 @@ import {
 } from '../components/landing';
 import { LivePreviewProvider } from '../components/LivePreviewProvider';
 import { getLandingPageContent } from '../lib/contentful-fetch';
+import type { LandingPageFields } from '../lib/contentful-types';
 
 export default async function LandingPage() {
   const draft = await draftMode();
   const isPreview = draft.isEnabled;
 
   const content = await getLandingPageContent(isPreview);
-  const fields = content?.fields;
+  const fields = content?.fields as LandingPageFields | undefined;
 
   return (
     <LivePreviewProvider isEnabled={isPreview}>
