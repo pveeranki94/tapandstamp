@@ -12,10 +12,10 @@ STAGING_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 PROD_SUPABASE_URL="https://kugoawbksufodyyjdkdl.supabase.co"
 PROD_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1Z29hd2Jrc3Vmb2R5eWpka2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4Nzc0MDQsImV4cCI6MjA4MTQ1MzQwNH0.cDnZDztdoS4HmuP3Lwedcj42RpkRaHZQVKQy8_s_E8c"
 
-# Contentful configuration (same space, different environments)
-CONTENTFUL_SPACE_ID="${CONTENTFUL_SPACE_ID:-}"
-CONTENTFUL_STAGING_DELIVERY_TOKEN="${CONTENTFUL_STAGING_DELIVERY_TOKEN:-}"
-CONTENTFUL_PROD_DELIVERY_TOKEN="${CONTENTFUL_PROD_DELIVERY_TOKEN:-}"
+# Contentful configuration - fetch from GCP secrets if not set locally
+CONTENTFUL_SPACE_ID="${CONTENTFUL_SPACE_ID:-$(gcloud secrets versions access latest --secret=contentful-space-id 2>/dev/null || echo '')}"
+CONTENTFUL_STAGING_DELIVERY_TOKEN="${CONTENTFUL_STAGING_DELIVERY_TOKEN:-$(gcloud secrets versions access latest --secret=contentful-staging-delivery-token 2>/dev/null || echo '')}"
+CONTENTFUL_PROD_DELIVERY_TOKEN="${CONTENTFUL_PROD_DELIVERY_TOKEN:-$(gcloud secrets versions access latest --secret=contentful-prod-delivery-token 2>/dev/null || echo '')}"
 
 # Get git commit hash for tagging
 TAG=$(git rev-parse --short HEAD)
