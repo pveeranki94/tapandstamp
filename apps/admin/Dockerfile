@@ -32,6 +32,14 @@ ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
 # Dummy service key for build (real value comes at runtime from secrets)
 ENV SUPABASE_SERVICE_ROLE_KEY=placeholder-service-key
 
+# Contentful build args (optional - page renders without if not set)
+ARG CONTENTFUL_SPACE_ID
+ARG CONTENTFUL_DELIVERY_TOKEN
+ARG CONTENTFUL_ENVIRONMENT=master
+ENV CONTENTFUL_SPACE_ID=${CONTENTFUL_SPACE_ID}
+ENV CONTENTFUL_DELIVERY_TOKEN=${CONTENTFUL_DELIVERY_TOKEN}
+ENV CONTENTFUL_ENVIRONMENT=${CONTENTFUL_ENVIRONMENT}
+
 RUN pnpm --filter @tapandstamp/admin build
 
 # Production stage
