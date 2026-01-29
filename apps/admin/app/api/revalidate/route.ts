@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   // Validate the webhook secret
   const secret = request.headers.get('x-contentful-webhook-secret');
 
-  if (secret !== process.env.CONTENTFUL_REVALIDATE_SECRET) {
+  if (!process.env.CONTENTFUL_REVALIDATE_SECRET || secret?.trim() !== process.env.CONTENTFUL_REVALIDATE_SECRET.trim()) {
     return NextResponse.json({ message: 'Invalid secret' }, { status: 401 });
   }
 
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const secret = searchParams.get('secret');
 
-  if (secret !== process.env.CONTENTFUL_REVALIDATE_SECRET) {
+  if (!process.env.CONTENTFUL_REVALIDATE_SECRET || secret?.trim() !== process.env.CONTENTFUL_REVALIDATE_SECRET.trim()) {
     return NextResponse.json({ message: 'Invalid secret' }, { status: 401 });
   }
 
